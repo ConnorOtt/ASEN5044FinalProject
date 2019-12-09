@@ -23,7 +23,7 @@ class KF:
         self.y_hist = []
 
 
-    def update_state(tk, yk):
+    def update(tk, yk):
         """
         Updates system's state estimate by processing an incoming measurement
          - Performs the time update (propagation to time of measurement)
