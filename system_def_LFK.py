@@ -184,10 +184,14 @@ def H_k_eval(x_nom_k, t_k, id_list=None):
 		id_list		<list>			List of station ids
 	
 	"""
-	sites = get_vis_sites(x_k, t_k, id_list=id_list)
+	sites, _ = get_vis_sites(x_nom_k, t_k, id_list=id_list)
 
-	H_k = [H_tilde_func(*x_nom_k, *xs) for xs in sites]
-	return np.concatenate(H_k)
+	if len(sites) is not 0:
+		H_k = [H_tilde_func(*[*x_nom_k, *xs]) for xs in sites]
+		return np.concatenate(H_k)
+
+	else: 
+		return None
 
 
 # Things to be imported by the filter definition to perform 
