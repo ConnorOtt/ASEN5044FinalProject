@@ -28,7 +28,7 @@ w1, w2 = sp.symbols('w1 w2')
 xs, ys, xdots, ydots = sp.symbols('xs ys xdots ydots')
 
 x = sp.Matrix([[x1, x2, x3, x4]]).T  # spacecraft state
-s = sp.Matrix([xs, ys, xdots, ydots]).T  # station state
+s = sp.Matrix([xs, xdots, ys, ydots]).T  # station state
 u = sp.Matrix([[u1, u2]]).T  # control vector
 w = sp.Matrix([[w1, w2]]).T  # Noise vector
 
@@ -86,7 +86,7 @@ def Omega_k_eval(dt):
 # Create h(x) = y
 h1 = ((x1 - xs)**2 + (x3 - ys)**2)**(1/2)
 h2 = ((x1 - xs)*(x2 - xdots) + (x3 - ys)*(x4 - ydots))/h1
-h3 = sp.atan((x3 - ys)/(x1 - xs))
+h3 = sp.atan2((x3 - ys), (x1 - xs))
 h = sp.Matrix([[h1, h2, h3]]).T
 h_lam = sp.lambdify([*x, *s], h, 'numpy')
 
@@ -113,16 +113,14 @@ def h_func(x_k, t_k, id_list=None):
 	if type(x_k) is not np.ndarray:
 		x_k = np.array(x_k)
 
-	sites = get_vis_sites(x_k, t_k, id_list=id_list)
-
-	print(len(sites))
+	sites, ids = get_vis_sites(x_k, t_k, id_list=id_list)
 	if len(sites) is 0:
-		return None
+		return None, None
 	else:
 	   	# Evaluate h(x) = y  
 	   	y_list = [h_lam(*[*x_k, *site]) for site in sites]
 	   	y = np.concatenate(y_list)
-	   	return y
+	   	return y, ids
 
 
 def get_vis_sites(x_k, t_k, id_list=None):
@@ -141,37 +139,41 @@ def get_vis_sites(x_k, t_k, id_list=None):
 	x1 = x_k[0]
 	x3 = x_k[2]
 
-	check_vis = True
+	check_vis = True # change back to True
 	if id_list is not None:
-		# Calculate rotation angle for each station at time t
-		rot = [omegaE*t_k + pi/6*(i-1) for i in id_list]
 		check_vis = False # assume specified stations can see the satellite
 	else:
-		rot = [omegaE*t_k + pi/6*(i-1) for i in range(1, 13)]	
+		id_list = np.arange(1, 13, 1)
 
-		# Convert to position and velocity
+	# Calculate rotation angle for each station at time t
+	rot = [omegaE*t_k + pi/6*(i-1) for i in id_list]	
+
+	# Convert to position and velocity
 	pos = [[rE*cos(r), rE*sin(r)] for r in rot]
 	vel = [[-rE*omegaE*sin(r), rE*omegaE*cos(r)] for r in rot]
 
 	if check_vis: # Remove stations that can't see the satellite
 		vis_pos_vel = []
-		for p, v in zip(pos, vel):
+		vis_ids = []
+		for s_id in id_list:
+			p = pos[int(s_id-1)]
+			v = vel[int(s_id-1)]
+
 			xs_arr = np.array([p[0], p[1]]) # site
 			x_arr = np.array([x1, x3]) # sat
 			slant = x_arr - xs_arr # sat minus site to get slant vector
 			
-			# print(slant)
-
 			anglediff = np.arccos(np.dot(slant, xs_arr) / 
 				(la.norm(slant)*la.norm(xs_arr)))
-			# print(anglediff)
+					
 			if (anglediff <= pi/2):
 				vis_pos_vel.append([p[0], v[0], p[1], v[1]])
-				print(vis_pos_vel)
+				vis_ids.append(s_id)
 			
-		return vis_pos_vel
+		return vis_pos_vel, vis_ids
 	else: 
-		return [[p[0], v[0], p[1], v[1]] for p, v in zip(pos, vel)]
+		pos_vel = [[p[0], v[0], p[1], v[1]] for p, v in zip(pos, vel)]
+		return pos_vel, id_list
 
 
 def H_k_eval(x_nom_k, t_k, id_list=None):
