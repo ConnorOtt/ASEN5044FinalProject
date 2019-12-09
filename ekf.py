@@ -7,17 +7,26 @@ from numpy.linalg import inv
 
 class EKF(KF):
 
+
     def __init__(self, system):
+
+        # Inherit basic system definition properties from general KF
+        super().__init__(self, system)
 
         # CT nonlinear system functions
         self.f = system['f']
         self.h = system['h']
 
-        # DT jacobian functions
-        self.F_func = system['H']
-        self.G_func = system['H']
-        self.H_func = system['H']
-        self.Omega_func = system['Omega']
 
+    def time_update():
+        """
+        Override the general KF's time update
+        The EKF uses a nonlinear propagation step. It numerically integrates 
+        the nonlinear system of equations in self.f to update perform the time
+        update.
+        """
+        # TODO: write and test
+
+        
 
 
