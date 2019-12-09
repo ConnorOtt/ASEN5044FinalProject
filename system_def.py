@@ -1,9 +1,6 @@
 """
 Define the dynamic system for ASEN 5044 - Final Project
 
-TODO: Check that this imports and can be called without errors. Sounds
-like a lot of work tho. - work in progress
-
 TODO: Split up the dynamics and measurements into two separate modules
 to keep things more organized. 
 
@@ -94,6 +91,7 @@ h_lam = sp.lambdify([*x, *s], h, 'numpy')
 H_tilde = h.jacobian(x)
 H_tilde_func = sp.lambdify([*x, *s], H_tilde, 'numpy')
 
+# Nonlinear measurement function
 def h_func(x_k, t_k, id_list=None):
 
 	"""Nonlinear measurement function - does not include noise
