@@ -20,4 +20,4 @@ class LKF(KF):
         self.Omega_func = system['Omega']
 
 
-
+    # TODO: define function that overrides the current propogation step

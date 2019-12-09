@@ -24,12 +24,16 @@ class KF:
 
         Output is new state estimate (mean and covariance) at time of measurement
         """
+        # TODO: time_update(dx_post_k, P_post_k)
+        # TODO: meas_update(dx_pre_kp1, P_pre_kp1, y_kp1, R_kp1)
+        # TODO: self.<state history>.append(<new state mean and cov>)
 
 
     def kalman_gain(P_pre_kp1, H_kp1, R_kp1, **kwargs):
             # Kalman gain at time t = t_{k+1}
             K_kp1 = P_pre_kp1@H_kp1 @ inv(H_kp1@P_pre_kp1@H_kp1.T + R_kp1)
             return K_kp1
+
 
     def time_update(dx_post_k, P_post_k, **kwargs):
             # time update to bring x and P up to k+1 from k (LKF)
