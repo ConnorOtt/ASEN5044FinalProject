@@ -1,2 +1,10 @@
 *.pyc
 *.ipynb*
+
+# LaTeX stuffs
+*.fdb_latexmk
+*.aux
+*.fls
+*.log
+Report/main.pdf
+*.synctex.gz

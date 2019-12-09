@@ -42,42 +42,44 @@ class KF:
         return K_kp1
 
 
-    # TODO: make this just the general KF time update
+
+    # NOTE: time_update() and meas_update() are not actually used in this 
+    #       project, so this hasn't actually been tested. (Beware if 
+    #       adapting this code for another project.)
+    """
     def time_update(dx_post_k, P_post_k, **kwargs):
-        # time update to bring x and P up to k+1 from k (LKF)
-        x_nom_k = kwargs['x_nom_k']
-        delta_t = kwargs['dt']
+        # time update to bring x and P up to k+1 from k
+        t_k = kwargs['t_k']
         u_k = kwargs['u_k']
         Q_k = kwargs['Q_k']
 
-        F_k = F_func(x_nom_k, delta_t)
-        G_k = G_func(x_nom_k, delta_t)
-        Omega_k = Omega_func(x_nom_k, delta_t)
+        # Assumes F and G are only functions of t
+        F_k = F_func(t_k)
+        G_k = G_func(t_k)
+        Omega_k = Omega_func(t_k)
 
-        dx_pre_kp1 = F_k @ dx_post_k + G_k @ u_k
-        P_pre_kp1 = F_k @ dx_post_k @ F_k.T + Omega_k @ Q_k @ Omega_k.T
+        x_pre_kp1 = F_k @ x_post_k + G_k @ u_k
+        P_pre_kp1 = F_k @ x_post_k @ F_k.T + Q_k
 
-        return dx_pre_kp1, P_pre_kp1
+        return x_pre_kp1, P_pre_kp1
 
 
-    # TODO: make this just the general KF measurement update
-    def meas_update(dx_pre_kp1, P_pre_kp1, y_kp1, R_kp1, **kwargs):
+    def meas_update(x_pre_kp1, P_pre_kp1, y_kp1, R_kp1, **kwargs):
         # Apply measurement update for LKF
         id_list = kwargs['id_list']
         t_kp1 = kwargs['t_kp1']
-        x_nom_kp1 = kwargs['x_nom_kp1']
 
-        # Evaluate jacobians and Kalman gain on nominal trajectory
-        H_kp1 = H_func(x_nom_kp1, t_kp1, id_list=id_list)
+        # Evaluate H and K at time t_kp1
+        H_kp1 = H_func(t_kp1, id_list=id_list)
         K_kp1 = kalman_gain(P_pre_kp1, H_kp1, R_kp1)
 
         # Generate nominal measurement and pre-fit residual
-        y_nom_kp1 = h(x_nom_kp1, t_kp1, id_list=id_list) # nominal measurement
+        y_nom_kp1 = h(t_kp1, id_list=id_list) # nominal measurement
         dy_kp1 = y_kp1 - y_nom_kp
-        pre_fit_residual = dy_kp1 - H_kp1 @ dx_pre_kp1;
+        pre_fit_residual = dy_kp1 - H_kp1 @ x_pre_kp1;
 
         # Apply mu
-        dx_post_kp1 = dx_pre_kp1 + K_kp1 @ pre_fit_residual
+        x_post_kp1 = x_pre_kp1 + K_kp1 @ pre_fit_residual
         P_post_kp1 = (I - K_kp1 @ H_kp1) @ P_pre_kp1
 
         # TODO: Package some of this up into a dict as output to include pre/post-fit 
@@ -85,7 +87,8 @@ class KF:
         # jacobians. The dict can be parsed once all of them are collected and the 
         # filter finishes.
 
-        return dx_post_kp1, P_post_kp1
+        return x_post_kp1, P_post_kp1
+    """
 
 
 
