@@ -1,9 +1,6 @@
 """
 Define the dynamic system for ASEN 5044 - Final Project
 
-TODO: Check that this imports and can be called without errors. Sounds
-like a lot of work tho. - work in progress
-
 TODO: Split up the dynamics and measurements into two separate modules
 to keep things more organized. 
 
@@ -52,9 +49,13 @@ A_tilde_func = sp.lambdify(x, A_tilde, 'numpy')
 B_tilde = np.array(f.jacobian(u).tolist()).astype(np.float64)
 Gam_tilde = np.array(f.jacobian(w).tolist()).astype(np.float64)
 
+
 def f_func(t_k, x_k):
 	# Nonlinear dynamics function w/o noise
 
+	if type(x_k) is not np.ndarray:  # for the odd accidental list input
+		x_k = np.array(x_k)
+		
 	u_k=[0, 0]
 	w_k=[0, 0]
 
@@ -94,6 +95,7 @@ h_lam = sp.lambdify([*x, *s], h, 'numpy')
 H_tilde = h.jacobian(x)
 H_tilde_func = sp.lambdify([*x, *s], H_tilde, 'numpy')
 
+# Nonlinear measurement function
 def h_func(x_k, t_k, id_list=None):
 
 	"""Nonlinear measurement function - does not include noise
@@ -110,7 +112,7 @@ def h_func(x_k, t_k, id_list=None):
 
 	"""
 
-	if type(x_k) is not np.ndarray:
+	if type(x_k) is not np.ndarray:  # for the odd accidental list input
 		x_k = np.array(x_k)
 
 	sites, ids = get_vis_sites(x_k, t_k, id_list=id_list)
@@ -121,6 +123,27 @@ def h_func(x_k, t_k, id_list=None):
 	   	y_list = [h_lam(*[*x_k, *site]) for site in sites]
 	   	y = np.concatenate(y_list)
 	   	return y, ids
+
+
+def H_k_eval(x_nom_k, t_k, id_list=None):
+	"""Evaluate H along nominal state for every station visible
+		
+		x_k 		<array_like>	State to evaluate on 
+		t_k			<np.float64>	Time at which to evaluate
+		id_list		<list>			List of station ids
+	
+	"""
+	if type(x_k) is not np.ndarray:  # for the odd accidental list input
+		x_k = np.array(x_k)
+
+	sites, _ = get_vis_sites(x_nom_k, t_k, id_list=id_list)
+
+	if len(sites) is not 0:
+		H_k = [H_tilde_func(*[*x_nom_k, *xs]) for xs in sites]
+		return np.concatenate(H_k)
+
+	else: 
+		return None
 
 
 def get_vis_sites(x_k, t_k, id_list=None):
@@ -174,21 +197,6 @@ def get_vis_sites(x_k, t_k, id_list=None):
 	else: 
 		pos_vel = [[p[0], v[0], p[1], v[1]] for p, v in zip(pos, vel)]
 		return pos_vel, id_list
-
-
-def H_k_eval(x_nom_k, t_k, id_list=None):
-	"""Evaluate H along nominal state for every station visible
-		
-		x_k 		<array_like>	State to evaluate on 
-		t_k			<np.float64>	Time at which to evaluate
-		id_list		<list>			List of station ids
-	
-	"""
-	sites = get_vis_sites(x_k, t_k, id_list=id_list)
-
-	H_k = [H_tilde_func(*x_nom_k, *xs) for xs in sites]
-	return np.concatenate(H_k)
-
 
 # Things to be imported by the filter definition to perform 
 # time and measurement updates
