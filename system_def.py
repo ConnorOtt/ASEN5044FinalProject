@@ -55,7 +55,7 @@ def f_func(t_k, x_k):
 	# Nonlinear dynamics function w/o noise
 
 	if type(x_k) is not np.ndarray:  # for the odd accidental list input
-		x_k = np.array(x_k)
+		x_k = np.array(x_k).reshape((-1, 1))
 		
 	u_k=[0, 0]
 	w_k=[0, 0]
@@ -72,7 +72,7 @@ nl_orbit_prop = ode(f_func).set_integrator('dopri5')
 # Functions to discretize CT jacobians
 def F_k_eval(x_nom_k, dt):
 	"""Single step Euler integration to discretize CT dynamics""" 
-	return I + dt*A_tilde_func(*x_nom_k)
+	return I + dt*np.array(A_tilde_func(*x_nom_k).tolist()).astype(np.float64)
 
 
 def G_k_eval(dt):
@@ -117,15 +117,15 @@ def h_func(x_k, t_k, id_list=None):
 	"""
 
 	if type(x_k) is not np.ndarray:  # for the odd accidental list input
-		x_k = np.array(x_k)
+		x_k = np.array(x_k).reshape((-1, 1))
 
 	sites, ids = get_vis_sites(x_k, t_k, id_list=id_list)
 	if len(sites) is 0:
 		return None, None
 	else:
 	   	# Evaluate h(x) = y  
-	   	y_list = [h_lam(*[*x_k, *site]) for site in sites]
-	   	y = np.concatenate(y_list)
+	   	y_list = [h_lam(*[*x_k, *site]) for site in sites] 
+	   	y = np.concatenate(y_list).reshape((len(y_list)*p, )) # lots of reshaping everywhere - looking for 1d vectors always and 2d matrices
 	   	return y, ids
 
 
@@ -138,14 +138,13 @@ def H_k_eval(x_nom_k, t_k, id_list=None):
 	
 	"""
 	if type(x_nom_k) is not np.ndarray:  # for the odd accidental list input
-		x_nom_k = np.array(x_nom_k)
+		x_k = np.array(x_k).reshape((-1, 1))
 
 	sites, _ = get_vis_sites(x_nom_k, t_k, id_list=id_list)
 
 	if len(sites) is not 0:
 		H_k = [H_tilde_func(*[*x_nom_k, *xs]) for xs in sites]
-		return np.concatenate(H_k)
-
+		return np.concatenate(H_k).astype(np.float64)
 	else: 
 		return None
 

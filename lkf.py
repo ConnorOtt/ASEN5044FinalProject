@@ -38,7 +38,7 @@ class LKF(KF):
         self.dx_0 = system['dx_0']
         self.x_nom_0 = system["x_nom_0"]
         self.delta_t = system["dt"]
-        self.u_k = np.zeros((2,1))  # no control for now or ever lol
+        self.u_k = np.zeros((2,))  # no control for now or ever lol
         self.Q_k = system["Q"]
         self.R_kp1 = system["R"]
 
@@ -65,9 +65,17 @@ class LKF(KF):
         Omega_k = self.Omega_func(self.delta_t)
         # print(G_k.shape)
         # print(self.u_k.shape)
+        # print(F_k.shape)
+        # print(dx_post_k.shape)
+        # print(self.Q_k.shape)
+        # print(Omega_k.shape)
+
+
 
         dx_pre_kp1 = F_k @ dx_post_k + G_k @ self.u_k
-        P_pre_kp1 = F_k @ dx_post_k @ F_k.T + Omega_k @ self.Q_k @ Omega_k.T
+        P_pre_kp1 = F_k @ P_post_k @ F_k.T + Omega_k @ self.Q_k @ Omega_k.T
+
+        # print(dx_pre_kp1.shape)   
 
         return dx_pre_kp1, P_pre_kp1
 
@@ -76,7 +84,8 @@ class LKF(KF):
         """
         Override the general KF's measurement update.
         """
-        print(y_kp1)
+        id_list = y_kp1['stationID']
+        y_kp1 = y_kp1['meas']
         if y_kp1 is None:
             return dx_pre_kp1, P_pre_kp1
 
@@ -85,23 +94,22 @@ class LKF(KF):
 
         # Evaluate jacobians and Kalman gain on nominal trajectory
         H_kp1 = self.H_func(x_nom_kp1, t_kp1, id_list=id_list)
-        if H_kp1.shape[0] > 3:
-            R_list = [self.R_kp1 for _ in range(int(H_kp1.shape[0]/3))]
-            R_kp1 = block_diag(*R_list)
-        else:
-            R_kp1 = self.R_kp1
+        R_list = [self.R_kp1 for _ in range(int(H_kp1.shape[0]/3))]
+        R_kp1 = block_diag(*R_list)
 
         K_kp1 = self.kalman_gain(P_pre_kp1, H_kp1, R_kp1)
 
         # Generate nominal measurement and pre-fit residual
         y_nom_kp1, _ = self.h(x_nom_kp1, t_kp1, id_list=id_list) # nominal measurement
-        # print(y_kp1)
+        print(y_nom_kp1.shape)
         dy_kp1 = y_kp1 - y_nom_kp1
         pre_fit_residual = dy_kp1 - H_kp1 @ dx_pre_kp1;
 
         # Apply measurement update
         dx_post_kp1 = dx_pre_kp1 + K_kp1 @ pre_fit_residual
         P_post_kp1 = (I - K_kp1 @ H_kp1) @ P_pre_kp1
+
+        print(dx_pre_kp1)
 
         # TODO: Package some of this up into a dict as output to include pre/post-fit 
         # residuals, pre/post measurement update stats and maybe some of the evaluated
@@ -122,5 +130,15 @@ class LKF(KF):
         self.x_nom_k = self.x_nom_th[-1]
 
         return self.x_nom_k
+
+
+    """
+    @property
+    def R_kp1(self):
+        
+        if self.
+
+        return self.R_kp1
+    """
 
 
