@@ -5,7 +5,7 @@ Define linearized Kalman filter
 from kf import KF
 from numpy.linalg import inv
 import numpy as np
-
+from constants import I #dentity
 
 class LKF(KF):
 
@@ -57,7 +57,7 @@ class LKF(KF):
         # Pull the latest measurement and associated data
         # TODO: maybe think of a better way to do this. Seems kinda sketch, idk
         t_kp1 = self.t_hist[-1]
-        y_kp1 = self.y_hist[-1]["meas"]
+        y_kp1 = self.y_hist[-1]["meas"].T
         id_list = self.y_hist[-1]["stationID"]
 
 
@@ -66,10 +66,14 @@ class LKF(KF):
         K_kp1 = self.kalman_gain(P_pre_kp1, H_kp1, self.R_kp1)
 
         # Generate nominal measurement and pre-fit residual
-        y_nom_kp1 = self.h(self.x_nom_kp1, t_kp1, id_list=id_list)[0] # nominal measurement
+        y_nom_kp1, _ = self.h(self.x_nom_kp1, t_kp1, id_list=id_list) # nominal measurement
         # FIXME: This is erroring^^ because it's returning a couple outputs
         #        This is probably a good spot to be thinking about the dynamic 
         #        sizing of y and H
+
+        print(y_kp1)
+        print(y_nom_kp1)
+
         dy_kp1 = y_kp1 - y_nom_kp1
         pre_fit_residual = dy_kp1 - H_kp1 @ dx_pre_kp1;
         # FIXME: All sorts of sizing issues going on right here
