@@ -47,6 +47,19 @@ We then iterate on different process noise and measurement noise covariance matr
 
 \subsection{CT Model Jacobians}
 
+$\tilde{A}$
+$$\left[\begin{matrix}0 & 1 & 0 & 0\\\frac{1195800.0 x_{1}^{2}}{\left(x_{1}^{2} + x_{3}^{2}\right)^{2.5}} - \frac{398600}{\left(x_{1}^{2} + x_{3}^{2}\right)^{1.5}} & 0 & \frac{1195800.0 x_{1} x_{3}}{\left(x_{1}^{2} + x_{3}^{2}\right)^{2.5}} & 0\\0 & 0 & 0 & 1\\\frac{1195800.0 x_{1} x_{3}}{\left(x_{1}^{2} + x_{3}^{2}\right)^{2.5}} & 0 & \frac{1195800.0 x_{3}^{2}}{\left(x_{1}^{2} + x_{3}^{2}\right)^{2.5}} - \frac{398600}{\left(x_{1}^{2} + x_{3}^{2}\right)^{1.5}} & 0\end{matrix}\right]$$
+
+$\tilde{B}$
+$$\left[\begin{matrix}0.0 & 0.0\\1.0 & 0.0\\0.0 & 0.0\\0.0 & 1.0\end{matrix}\right]$$
+
+$\tilde{\Gamma}$
+$$\left[\begin{matrix}0.0 & 0.0\\1.0 & 0.0\\0.0 & 0.0\\0.0 & 1.0\end{matrix}\right]$$
+
+$\tilde{H}$ - Hmmm
+$$\left[\begin{matrix}\frac{1.0 x_{1} - 1.0 xs}{\left(\left(x_{1} - xs\right)^{2} + \left(x_{3} - ys\right)^{2}\right)^{0.5}} & 0 & \frac{1.0 x_{3} - 1.0 ys}{\left(\left(x_{1} - xs\right)^{2} + \left(x_{3} - ys\right)^{2}\right)^{0.5}} & 0\\\frac{\left(- 1.0 x_{1} + 1.0 xs\right) \left(\left(x_{1} - xs\right) \left(x_{2} - xdots\right) + \left(x_{3} - ys\right) \left(x_{4} - ydots\right)\right)}{\left(\left(x_{1} - xs\right)^{2} + \left(x_{3} - ys\right)^{2}\right)^{1.5}} + \frac{x_{2} - xdots}{\left(\left(x_{1} - xs\right)^{2} + \left(x_{3} - ys\right)^{2}\right)^{0.5}} & \frac{x_{1} - xs}{\left(\left(x_{1} - xs\right)^{2} + \left(x_{3} - ys\right)^{2}\right)^{0.5}} & \frac{\left(- 1.0 x_{3} + 1.0 ys\right) \left(\left(x_{1} - xs\right) \left(x_{2} - xdots\right) + \left(x_{3} - ys\right) \left(x_{4} - ydots\right)\right)}{\left(\left(x_{1} - xs\right)^{2} + \left(x_{3} - ys\right)^{2}\right)^{1.5}} + \frac{x_{4} - ydots}{\left(\left(x_{1} - xs\right)^{2} + \left(x_{3} - ys\right)^{2}\right)^{0.5}} & \frac{x_{3} - ys}{\left(\left(x_{1} - xs\right)^{2} + \left(x_{3} - ys\right)^{2}\right)^{0.5}}\\\frac{- x_{3} + ys}{\left(x_{1} - xs\right)^{2} + \left(x_{3} - ys\right)^{2}} & 0 & \frac{x_{1} - xs}{\left(x_{1} - xs\right)^{2} + \left(x_{3} - ys\right)^{2}} & 0\end{matrix}\right]$$ 	
+
+
 \subsection{DT Linearized Model Matrices}
 
 \subsection{Simulated Nonlinear vs. Linearized System}

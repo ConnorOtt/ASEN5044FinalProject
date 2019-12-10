@@ -219,4 +219,20 @@ ct_nl_funcs = {
 }
 
 
+def mat_latex():
+	"""Get the jacobians in latex markdown"""
+
+	jacs = {
+		'A_tilde':A_tilde, 
+		'B_tilde':sp.Matrix(B_tilde), 
+		'Gam_tilde':sp.Matrix(Gam_tilde), 
+		'H_tilde':H_tilde}
+	
+	jac_latex = {}
+	for key, val in jacs.items():
+
+		print(sp.latex(val))
+		jac_latex[key] = sp.latex(val)
+
+	return jac_latex
 
