@@ -7,7 +7,7 @@
 \usepackage{soul}			% for highlighting
 \usepackage{mathtools}			% for text over equals sign
 \newcommand\ivtequal{\stackrel{\mathclap{\normalfont\scriptsize\mbox{FVT}}}{=}}
-\usepackage{./use/mcode}		% for including code
+% \usepackage{./use/mcode}		% for including code
 
 
 \begin{document}
@@ -19,16 +19,22 @@
 
 
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% INTRODUCTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
-This project involves the lots of things and stuffs. 
-It was found, however, during analysis that stuffs was indeed the driving factor.
-In an attempt to drive the stuffs to equilibriums, things was done to it. 
-This report reports the these things that were done to the stuffs. 
+In order to keep track of Earth-orbiting objects, a typical observation scheme includes ground stations which measure range and range-rate to a passing satellite. 
+These measurements, when combined with the known locations of the stations, allows for precises estimates of a satellites orbit state. 
+In addition to an orbit estimate, it's usually useful to quantify the the uncertainty in the estimate. 
+This quantity is a based on the uncertainty in the motion of the satellite in orbit, and the uncertainty in the incoming measurements. 
+Neither of these uncertainties are necessarily known.
+In order to accurately predict an estimate uncertainty, both of these uncertainties must be balanced with each other. 
+This is frequently carried out with predictor-corrector estimation algorithm such as the Linearized Kalman Filter (LKF) or Extended Kalman Filter (EKF.)
+
+In this report, we explore the performance of the LKF and EKF on nonlinear systems with dynamic uncertainty (process noise) and measurement uncertainty (measurement nose.) 
+In developing these algorithms, we assume the process and measurement noise are unknown.
+We then iterate on different process noise and measurement noise covariance matrices and evaluate the algorithms using \_\_\_\_ (NEES) and \_\_\_\_ (NIS) tests until suitable values for uncertainty are found. 
 
 
-\subsection{Physical System}
+% \subsection{Physical System}
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=.4\textwidth]{./Figures/system_setup.png}
@@ -37,6 +43,15 @@ This report reports the these things that were done to the stuffs.
 \end{figure}
 
 
+\subsection{Part I. Basic System Analysis}
+
+\subsection{CT Model Jacobians}
+
+\subsection{DT Linearized Model Matrices}
+
+\subsection{Simulated Nonlinear vs. Linearized System}
+\subsubsection{Nonlinear perturbed trajectory simulation vs. linear perturbation propagation}
+\subsubsection{Nonlinear perturbed trajectory measurement simulation vs linear perturbation mapping}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% CONCLUSION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
