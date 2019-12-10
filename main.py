@@ -50,8 +50,11 @@ yraw = np.concatenate(yraw, axis=0)
 ydata = []
 stationIDs = []
 for yk in yraw:
-    ydata.append(yk[0:3].T)
-    stationIDs.append(np.squeeze(yk[-1]))
+    ypacket = {
+            "meas": yk[0:3].T,
+            "stationID": np.squeeze(yk[-1]).tolist() 
+            }
+    ydata.append(ypacket)
 
 tdata = data["tvec"].T
 Qtrue = data["Qtrue"]
@@ -59,8 +62,15 @@ Rtrue = data["Rtrue"]
 
 
 # Initialize system
+# NOTE: A lot of this is random values right now
 system = {
+        "t0": tdata[0], 
         "x0": x0, 
+        "P0": 10000 * np.ones((n,n)), 
+        "x_nom": x0 + .0001,
+        "dt": 10,
+        "Q": Qtrue, 
+        "R": Rtrue, 
         **dt_jac_eval_funcs, 
         **ct_nl_funcs
         }
@@ -70,7 +80,8 @@ lkf = LKF(system)
 
 # Simulate measurements coming in and continuously update the estimate with KF
 #for k in range(len(ydata)):
-for k in range(3):
+for k in range(1,3):
+    print(k)
     tk = tdata[k]
     yk = ydata[k]
     lkf.update(tk, yk)

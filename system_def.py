@@ -133,8 +133,8 @@ def H_k_eval(x_nom_k, t_k, id_list=None):
 		id_list		<list>			List of station ids
 	
 	"""
-	if type(x_k) is not np.ndarray:  # for the odd accidental list input
-		x_k = np.array(x_k)
+	if type(x_nom_k) is not np.ndarray:  # for the odd accidental list input
+		x_nom_k = np.array(x_nom_k)
 
 	sites, _ = get_vis_sites(x_nom_k, t_k, id_list=id_list)
 
@@ -167,6 +167,9 @@ def get_vis_sites(x_k, t_k, id_list=None):
 		check_vis = False # assume specified stations can see the satellite
 	else:
 		id_list = np.arange(1, 13, 1)
+
+	if not isinstance(id_list, list):
+		id_list = [id_list]
 
 	# Calculate rotation angle for each station at time t
 	rot = [omegaE*t_k + pi/6*(i-1) for i in id_list]	
