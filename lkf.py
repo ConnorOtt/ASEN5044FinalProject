@@ -41,12 +41,12 @@ class LKF(KF):
         self.Q_k = system["Q"]
         self.R_kp1 = system["R"]
 
-        self.x_nom_k = x_nom_0
+        self.x_nom_k = self.x_nom_0
         self.x_nom_th = [self.x_nom_0]
 
         # 'Current' things in the filter (all post meas where applicable)
-        self.dx_k = dx_0
-        self.P_k = self.P0
+        self.dx_k = self.dx_0
+        self.P_k = self.P_0
         self.x_k = system['x_0']  # this is an estimate
 
 
@@ -85,11 +85,11 @@ class LKF(KF):
         id_list = self.y_hist[-1]["stationID"]
 
         # Evaluate jacobians and Kalman gain on nominal trajectory
-        H_kp1 = self.H_func(self.x_nom_kp1, t_kp1, id_list=id_list)
+        H_kp1 = self.H_func(x_nom_kp1, t_kp1, id_list=id_list)
         K_kp1 = self.kalman_gain(P_pre_kp1, H_kp1, self.R_kp1)
 
         # Generate nominal measurement and pre-fit residual
-        y_nom_kp1, _ = self.h(self.x_nom_kp1, t_kp1, id_list=id_list) # nominal measurement
+        y_nom_kp1, _ = self.h(x_nom_kp1, t_kp1, id_list=id_list) # nominal measurement
         dy_kp1 = y_kp1 - y_nom_kp1
         pre_fit_residual = dy_kp1 - H_kp1 @ dx_pre_kp1;
 
@@ -110,10 +110,10 @@ class LKF(KF):
             by one time step for linearization
         """ 
 
-        nom_prop.set_initial_value(self.x_nom_, 0)
+        nom_prop.set_initial_value(self.x_nom_k, 0)
         x_nom_kp1 = nom_prop.integrate(self.delta_t)
-        self.x_nom_hist.append(x_nom_kp1)
-        self.x_nom_k = self.x_nom_hist[-1]
+        self.x_nom_th.append(x_nom_kp1)
+        self.x_nom_k = self.x_nom_th[-1]
 
         return self.x_nom_k
 

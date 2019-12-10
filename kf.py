@@ -28,14 +28,14 @@ class KF(ABC):
         self.Omega_func = system["Omega"]
 
         # Initial conditions
-        self.t0 = system["t0"]
-        self.x0 = system["x0"]
-        self.P0 = system["P0"]
+        self.t_0 = system["t_0"]
+        self.x_0 = system["x_0"]
+        self.P_0 = system["P_0"]
 
         # State estimate history
-        self.t_hist = [self.t0]
-        self.x_hist = [self.x0]
-        self.P_hist = [self.P0]
+        self.t_hist = [self.t_0]
+        self.x_hist = [self.x_0]
+        self.P_hist = [self.P_0]
         self.y_hist = []
 
     
