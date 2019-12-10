@@ -67,7 +67,7 @@ class KF(ABC):
         self.y_hist.append(y_kp1)
 
         x_pre_kp1, P_pre_kp1 = self.time_update(self.x_hist[-1], self.P_hist[-1])
-        x_post_kp1, P_post_kp1 = self.meas_update(x_pre_kp1, P_pre_kp1, y_kp1)
+        x_post_kp1, P_post_kp1 = self.meas_update(x_pre_kp1, P_pre_kp1, y_kp1, t_kp1)
 
         # Update filter's state estimate
         self.x_hist.append(x_post_kp1)

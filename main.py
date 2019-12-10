@@ -46,21 +46,25 @@ dx_0 = np.array([0, 0.075, 0, -0.021])           # Initial deviation in Ofer's w
 data = loadmat('Assignment/orbitdeterm_finalproj_KFdata.mat')
 
 # Extract measurements (y) and their corresponding station IDs
-yraw = data["ydata"].T
-yraw = np.concatenate(yraw, axis=0)
 ydata = []
-stationIDs = []
-for yk in yraw:
-    ypacket = {
-            "meas": yk[0:3].T,
-            "stationID": np.squeeze(yk[-1]).tolist() 
-            }
-    ydata.append(ypacket)
+yraw = data['ydata'][0]
+for y_k in yraw[1:]: # Ignoring measurement 0
+    if y_k.size is 0:
+        meas, ids = (None, None)
+    else:   
+        # Make long measurements
+        meas, ids = zip(*[(y_k[:3, i], y_k[3, i]) for i in range(int(y_k.shape[1]))])
+        meas = np.concatenate(meas).reshape((-1, 1))
+        
+    y_packet = {
+        'meas':meas,
+        'stationID':ids
+    }
+    ydata.append(y_packet)
 
 tdata = data["tvec"].T
 Qtrue = data["Qtrue"]
 Rtrue = data["Rtrue"]
-
 
 # Initialize system
 # NOTE: ~A lot~ Less of this is random values right now
@@ -86,11 +90,9 @@ lkf = LKF(system)
 
 # Simulate measurements coming in and continuously update the estimate with KF
 #for k in range(len(ydata)):
-for k in range(1,3):
-    print(k)
-    tk = tdata[k]
-    yk = ydata[k]
-    lkf.update(tk, yk)
+for t_k, y_k in zip(tdata, ydata):
+    print(t_k, y_k)
+    lkf.update(t_k, y_k)
 
 
 

@@ -173,7 +173,7 @@ def get_vis_sites(x_k, t_k, id_list=None):
 		id_list = np.arange(1, 13, 1)
 
 	if not isinstance(id_list, list):
-		id_list = [id_list]
+		id_list = list(id_list)
 
 	# Calculate rotation angle for each station at time t
 	rot = [omegaE*t_k + pi/6*(i-1) for i in id_list]	

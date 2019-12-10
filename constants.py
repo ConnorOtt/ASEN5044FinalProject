@@ -8,6 +8,7 @@ from numpy import pi
 
 n = 4 # number of states 
 m = 2
+p = 3
 rE = 6378 # km - Earth radius
 r0 = rE + 300 # km - orbit radius
 delta_t = 10 # s

@@ -14,6 +14,7 @@ Conventions:
 # Standard imports
 from numpy.linalg import inv
 import numpy as np
+from scipy.linalg import block_diag
 
 # Local imports
 from kf import KF
@@ -62,6 +63,8 @@ class LKF(KF):
         F_k = self.F_func(x_nom_k, self.delta_t)
         G_k = self.G_func(self.delta_t)
         Omega_k = self.Omega_func(self.delta_t)
+        # print(G_k.shape)
+        # print(self.u_k.shape)
 
         dx_pre_kp1 = F_k @ dx_post_k + G_k @ self.u_k
         P_pre_kp1 = F_k @ dx_post_k @ F_k.T + Omega_k @ self.Q_k @ Omega_k.T
@@ -69,27 +72,30 @@ class LKF(KF):
         return dx_pre_kp1, P_pre_kp1
 
 
-    def meas_update(self, dx_pre_kp1, P_pre_kp1, y_kp1):
+    def meas_update(self, dx_pre_kp1, P_pre_kp1, y_kp1, t_kp1):
         """
         Override the general KF's measurement update.
         """
-        
+        print(y_kp1)
+        if y_kp1 is None:
+            return dx_pre_kp1, P_pre_kp1
+
         # Bring the nominal up to evaluate H at kp1
         x_nom_kp1 = self.__update_nom()
 
-        # Pull the latest measurement and associated data
-        # TODO: maybe think of a better way to do this. Seems kinda sketch, idk
-        #   looks great to me -Connor 
-        t_kp1 = self.t_hist[-1]
-        y_kp1 = self.y_hist[-1]["meas"].T
-        id_list = self.y_hist[-1]["stationID"]
-
         # Evaluate jacobians and Kalman gain on nominal trajectory
         H_kp1 = self.H_func(x_nom_kp1, t_kp1, id_list=id_list)
-        K_kp1 = self.kalman_gain(P_pre_kp1, H_kp1, self.R_kp1)
+        if H_kp1.shape[0] > 3:
+            R_list = [self.R_kp1 for _ in range(int(H_kp1.shape[0]/3))]
+            R_kp1 = block_diag(*R_list)
+        else:
+            R_kp1 = self.R_kp1
+
+        K_kp1 = self.kalman_gain(P_pre_kp1, H_kp1, R_kp1)
 
         # Generate nominal measurement and pre-fit residual
         y_nom_kp1, _ = self.h(x_nom_kp1, t_kp1, id_list=id_list) # nominal measurement
+        # print(y_kp1)
         dy_kp1 = y_kp1 - y_nom_kp1
         pre_fit_residual = dy_kp1 - H_kp1 @ dx_pre_kp1;
 
