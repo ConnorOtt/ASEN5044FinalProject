@@ -90,6 +90,11 @@ class LKF(KF):
 
         # Generate nominal measurement and pre-fit residual
         y_nom_kp1, _ = self.h(x_nom_kp1, t_kp1, id_list=id_list) # nominal measurement
+
+        # Stack y measurements if there are more than one
+        if y_kp1.shape[1] > 1:
+            y_kp1 = y_kp1.flatten('F')[:, np.newaxis ]
+            
         dy_kp1 = y_kp1 - y_nom_kp1
         pre_fit_residual = dy_kp1 - H_kp1 @ dx_pre_kp1;
 
@@ -116,5 +121,15 @@ class LKF(KF):
         self.x_nom_k = self.x_nom_th[-1]
 
         return self.x_nom_k
+
+
+    """
+    @property
+    def R_kp1(self):
+        
+        if self.
+
+        return self.R_kp1
+    """
 
 

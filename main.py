@@ -85,8 +85,8 @@ system = {
 lkf = LKF(system)
 
 # Simulate measurements coming in and continuously update the estimate with KF
-#for k in range(len(ydata)):
-for k in range(1,3):
+for k in range(1, len(ydata)):
+#for k in range(1,3):
     print(k)
     tk = tdata[k]
     yk = ydata[k]

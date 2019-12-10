@@ -14,6 +14,8 @@ Conventions:
 #NOTE: 0% chance that this runs as of now...just throwin around ideas
 
 from numpy.linalg import inv
+from numpy import empty
+from scipy.linalg import block_diag
 from abc import ABC, abstractmethod
 
 
@@ -47,8 +49,24 @@ class KF(ABC):
     def meas_update(self): pass
 
 
-    def kalman_gain(self, P_pre_kp1, H_kp1, R_kp1, **kwargs):
+    def kalman_gain(self, P_pre_kp1, H_kp1, R_kp1):
         # Kalman gain at time t = t_{k+1}
+
+        # If H is bigger because >1 measurement, then increase dimensions of R
+        # Just replicating R with block_diag until it's big enough
+        # NOTE: Does this seem reasonable?
+        if H_kp1.shape[0] > R_kp1.shape[0]:
+
+            p = R_kp1.shape[0]              # size of a normal measurement set
+            m = int(H_kp1.shape[0] / p)     # number of measurements
+
+            R = R_kp1
+            for i in range(2,m+1):
+                R = block_diag(R, R_kp1)    # Replicate R along diagonal
+            R_kp1 = R                       # Update R_kp1
+
+
+
         K_kp1 = P_pre_kp1@H_kp1.T @ inv(H_kp1@P_pre_kp1@H_kp1.T + R_kp1)
         return K_kp1
 
@@ -72,6 +90,7 @@ class KF(ABC):
         # Update filter's state estimate
         self.x_hist.append(x_post_kp1)
         self.P_hist.append(P_post_kp1)
+
 
     def report_hist(self): 
         """Output time history of everything (requested)
