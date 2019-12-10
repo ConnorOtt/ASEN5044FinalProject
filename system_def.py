@@ -12,6 +12,7 @@ import sympy as sp
 import numpy as np
 import numpy.linalg as la
 from math import sin, cos
+from scipy.integrate import ode
 
 # Local imports
 from constants import *
@@ -64,6 +65,9 @@ def f_func(t_k, x_k):
 
 	return x_dot_k
 
+# Instantiate a nonlinear integrator to propagate nonlinear trajectory
+# need to set initial conditions and whatnot yourself. 
+nl_orbit_prop = ode(f_func).set_integrator('dopri5')
 
 # Functions to discretize CT jacobians
 def F_k_eval(x_nom_k, dt):

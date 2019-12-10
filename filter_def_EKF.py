@@ -11,9 +11,18 @@ Conventions:
 						nominal trajectory (not used in the EKF algorithm).
 """
 
-from .system_def_LFK import dt_jac_eval_funcs, ct_nl_funcs, n, m
+
+# TAKE A BREAK FROM THIS ONE AND WORK ON LKF FOR NOW
+
+
+# Standard imports
 from numpy.linalg import inv
 from scipy.integrate import ode
+
+# Local imports
+from system_def_LFK import dt_jac_eval_funcs, ct_nl_funcs
+from system_def_LFK import nl_orbit_prop as nl_prop
+from constants import I
 
 H_func = dt_jac_eval_funcs['H']
 F_func = dt_jac_eval_funcs['F']
@@ -22,9 +31,6 @@ Omega_func = dt_jac_eval_funcs['Omega']
 
 f = ct_nl_funcs['f']
 h = ct_nl_funcs['h']
-
-I = np.eye(n)
-nl_prop = ode(f).set_integrator('dopri5')
 
 
 def kalman_gain(P_pre_kp1, H_kp1, R_kp1, **kwargs):
@@ -48,7 +54,7 @@ def time_update(x_post_k, P_post_k, **kwargs):
 
 	# Nonlinear state propagation
 	nl_prop.set_initial_value(x_post_k, t_k)
-	x_pre_kp1 = nl_prop.integrate(t_kp1)	
+	x_pre_kp1 = nl_prop.integrate(t_kp1)
 	
 	return x_pre_kp1, P_pre_kp1
 

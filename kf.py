@@ -1,6 +1,16 @@
 """
 Define general Kalman filter
+
+Conventions:
+    _k, _kp1, _km1      -Indicates time steps k, k (p)lus 1 and k (m)inus 1. This file does not
+                        use _km1, and all time updates bring state and covariance from time k to 
+                        kp1.
+    _pre, _post         -Indicates pre or post measurement update for the specified time step.
+                        Matches ^- and ^+ notation respectively.
+    _nom                -Indicates state or measurement pulled from or evaluated on some 
+                        predetermined nominal trajectory.
 """
+
 #NOTE: 0% chance that this runs as of now...just throwin around ideas
 
 from numpy.linalg import inv
@@ -53,7 +63,7 @@ class KF(ABC):
         """
         
         # Update filter's latest t and y
-        self.t_hist.append(t_kp1)
+        self.t_hist.append(t_kp1)  # current estimate is at t_k when this line goes
         self.y_hist.append(y_kp1)
 
         x_pre_kp1, P_pre_kp1 = self.time_update(self.x_hist[-1], self.P_hist[-1])
@@ -63,3 +73,14 @@ class KF(ABC):
         self.x_hist.append(x_post_kp1)
         self.P_hist.append(P_post_kp1)
 
+    def report_hist(self): 
+        """Output time history of everything (requested)
+
+        """
+        pass
+
+
+    def plot_hist(self):
+        """yeah
+        """
+        pass
