@@ -3,6 +3,7 @@ Define extended Kalman filter
 """
 
 from numpy.linalg import inv
+from kf import KF
 
 
 class EKF(KF):
@@ -18,7 +19,7 @@ class EKF(KF):
         self.h = system['h']
 
 
-    def time_update():
+    def time_update(self, tk, yk):
         """
         Override the general KF's time update
         The EKF uses a nonlinear propagation step. It numerically integrates 

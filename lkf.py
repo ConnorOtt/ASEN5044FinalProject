@@ -2,6 +2,7 @@
 Define linearized Kalman filter
 """
 
+from kf import KF
 from numpy.linalg import inv
 
 
@@ -11,14 +12,14 @@ class LKF(KF):
     def __init__(self, system):
 
         # Inherit basic system definition properties from general KF
-        super().__init__(self, system)
+        super().__init__(system)
 
         # CT nonlinear system functions
         self.f = system['f']
         self.h = system['h']
 
 
-    def time_update(dx_post_k, P_post_k, **kwargs):
+    def time_update(self, dx_post_k, P_post_k, **kwargs):
         """
         Override the general KF's time update.
         """
@@ -39,7 +40,7 @@ class LKF(KF):
         return dx_pre_kp1, P_pre_kp1
 
 
-    def meas_update(dx_pre_kp1, P_pre_kp1, y_kp1, R_kp1, **kwargs):
+    def meas_update(self, dx_pre_kp1, P_pre_kp1, y_kp1, R_kp1, **kwargs):
         """
         Override the general KF's measurement update.
         """

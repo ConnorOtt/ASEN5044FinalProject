@@ -23,7 +23,7 @@ class KF:
         self.y_hist = []
 
 
-    def update(tk, yk):
+    def update(self, tk, yk):
         """
         Updates system's state estimate by processing an incoming measurement
          - Performs the time update (propagation to time of measurement)
@@ -31,12 +31,17 @@ class KF:
 
         Output is new state estimate (mean and covariance) at time of measurement
         """
-        # TODO: time_update(dx_post_k, P_post_k)
-        # TODO: meas_update(dx_pre_kp1, P_pre_kp1, y_kp1, R_kp1)
-        # TODO: self.<state history>.append(<new state mean and cov>)
+        x_pre_kp1, P_pre_kp1 = time_update(x_post_k, P_post_k)
+        x_post_kp1, P_post_kp1 = meas_update(x_pre_kp1, P_pre_kp1, y_kp1, R_kp1)
+
+        # Update filter's state estimate
+        self.t_hist.append(tk)
+        self.y_hist.append(yk)
+        self.x_hist.append(x_post_kp1)
+        self.P_hist.append(P_post_kp1)
 
 
-    def kalman_gain(P_pre_kp1, H_kp1, R_kp1, **kwargs):
+    def kalman_gain(self, P_pre_kp1, H_kp1, R_kp1, **kwargs):
         # Kalman gain at time t = t_{k+1}
         K_kp1 = P_pre_kp1@H_kp1 @ inv(H_kp1@P_pre_kp1@H_kp1.T + R_kp1)
         return K_kp1
