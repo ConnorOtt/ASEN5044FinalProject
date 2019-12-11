@@ -18,7 +18,7 @@ from scipy.linalg import block_diag
 
 # Local imports
 from kf import KF
-from constants import I, p
+from constants import I, n, p, pi
 from system_def import nl_orbit_prop as nom_prop
 
 class LKF(KF):
@@ -71,17 +71,23 @@ class LKF(KF):
         id_list = y_kp1['stationID']
         y_kp1 = y_kp1['meas']
         if y_kp1 is None: # NOTE: this is getting ugly, any ideas?
+            none_meas = [None for _ in range(p)]
             out = {
                 'x_pre_kp1': dx_pre_kp1,
                 'x_post_kp1': dx_pre_kp1,
+                'x_update': np.zeros((n, )),
                 'P_pre_kp1': P_pre_kp1,
                 'P_post_kp1': P_pre_kp1,
-                'pre_fit_residual': [None for _ in range(p)],
-                'post_fit_residual': [None for _ in range(p)],
+                'pre_fit_residual': none_meas,
+                'post_fit_residual': none_meas,
                 'x_full_kp1':x_nom_kp1 + dx_pre_kp1,
-                'y_kp1': [None for _ in range(p)],
-                'dy_nom_kp1': [None for _ in range(p)],
-                'dy_est_kp1': [None for _ in range(p)],
+                'y_kp1': none_meas,
+                'y_nom_kp1': none_meas,
+                'dy_nom_kp1': none_meas,
+                'dy_est_kp1': none_meas,
+                'y_pre_est_kp1': none_meas,
+                'y_post_est_kp1': none_meas,
+                'dy_update': none_meas,
 
             }
 
@@ -95,32 +101,36 @@ class LKF(KF):
 
         # Generate nominal measurement and pre-fit residual
         y_nom_kp1, _ = self.h(x_nom_kp1, t_kp1, id_list=id_list) # nominal measurement
-        
-
-        # TODO: Fix next line, the elevation measurement is not constrained and
-        # sometimes flips to +/- 2*pi rad. H_kp1@dx_pre_kp1 is constrained to be 
-        # around 0 so no worries there. 
-        dy_kp1 = y_kp1 - y_nom_kp1
-        # dy_kp1 = self._constrain_angle(dy_kp1_tmp)
-
-        pre_fit_residual = dy_kp1 - H_kp1 @ dx_pre_kp1;
+         
+        dy_nom_kp1 = self.__wrap_angle(y_kp1 - y_nom_kp1)  # only operates on y[2]
+        dy_est_kp1 = H_kp1 @ dx_pre_kp1
+        pre_fit_residual = dy_nom_kp1 - dy_est_kp1;
 
         # Apply measurement update
         dx_post_kp1 = dx_pre_kp1 + K_kp1 @ pre_fit_residual
         P_post_kp1 = (I - K_kp1 @ H_kp1) @ P_pre_kp1
 
+        dy_est_post_km1 = H_kp1 @ dx_post_kp1
 
         out = {
             'x_pre_kp1': dx_pre_kp1,
             'x_post_kp1': dx_post_kp1,
+            'x_full_kp1':x_nom_kp1 + dx_post_kp1,
+            'x_update': K_kp1 @ pre_fit_residual,
+
             'P_pre_kp1': P_pre_kp1,
             'P_post_kp1': P_post_kp1,
             'pre_fit_residual': pre_fit_residual,
-            'post_fit_residual': dy_kp1 - H_kp1 @ dx_post_kp1,
-            'x_full_kp1':x_nom_kp1 + dx_post_kp1,
+            'post_fit_residual': dy_nom_kp1 - H_kp1 @ dx_post_kp1, 
+
+            'dy_nom_kp1': dy_nom_kp1,
+            'dy_est_kp1': dy_est_kp1,
+            'dy_update': dy_est_kp1 - dy_est_post_km1,
+
             'y_kp1':y_kp1,
-            'dy_nom_kp1': dy_kp1,
-            'dy_est_kp1': H_kp1 @ dx_pre_kp1,
+            'y_nom_kp1': y_nom_kp1,
+            'y_pre_est_kp1': y_nom_kp1 + dy_est_kp1,
+            'y_post_est_kp1': y_nom_kp1 + dy_est_post_km1,
 
         }
 
@@ -140,8 +150,13 @@ class LKF(KF):
 
         return x_nom_kp1
 
-    def __constrain_angle(self, meas):
+    def __wrap_angle(self, diff):
 
-        pass
+        if diff[2] > pi:
+            diff[2] -= 2*pi
+        elif diff[2] < -pi:
+            diff[2] += 2*pi 
+
+        return diff
 
 

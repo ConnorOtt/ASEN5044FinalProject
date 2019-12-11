@@ -88,22 +88,25 @@ system = {
 lkf = LKF(system)
 
 # Simulate measurements coming in and continuously update the estimate with KF
-num_meas = 1000
+num_meas = -1
 for t_k, y_k in zip(tdata[:num_meas], ydata[:num_meas]):
     lkf.update(t_k, y_k) 
 
+
+"""From here to next docstring is just 'splorin junk"""
 # for y in ydata[19:22]:
 #     pprint(y)
 
-out = lkf.report_hist(['x_post_kp1', 
-                        'x_pre_kp1',
-                        'pre_fit_residual', 
+out = lkf.report_hist(['y_kp1', 
+                        'y_nom_kp1',
+                        'dy_update', 
                         'dy_est_kp1',
-                        'post_fit_residual', 
-                        'dy_nom_kp1'])
+                        'x_post_kp1', 
+                        'dy_nom_kp1', 
+                        'x_update', 
+                        'x_full_kp1'])
 # for pfr in out['x_post_kp1'][200:300]:
 #     print(pfr)
-
 
 # Snoopin'
 import matplotlib.pyplot as plt
@@ -114,28 +117,44 @@ end = -1
 for i in range(p):
     meas_quant1 = [dy[i] for dy in out['dy_nom_kp1'][start:end]]
     meas_quant2 = [dy[i] for dy in out['dy_est_kp1'][start:end]]
+    # meas_quant3 = [dy[i] for dy in out['dy_update'][start:end]]
 
     ax[i]. plot(lkf.t_hist[start+1:end], meas_quant1, '-', color='orangered', label='plot1')
     ax[i]. plot(lkf.t_hist[start+1:end], meas_quant2, '-', color='dodgerblue', label='plot2')
+    # ax[i]. plot(lkf.t_hist[start+1:end], meas_quant3, '-', color='green', label='plot3')
+    
 ax[0].legend()
-plt.show()
+# # plt.show()
 
 
-# plt.rcParams['figure.figsize'] = 12, 4*n
+plt.rcParams['figure.figsize'] = 12, 4*n
 # fig, ax = plt.subplots(n, 1, sharex=True)
 # start = 0
-# end = 100
+# end = -1
 # for i in range(n):
-#     pre_state = [dy[i] for dy in out['x_pre_kp1'][start:end]]
-#     post_state = [dy[i] for dy in out['x_post_kp1'][start:end]]
+#     state_quant1 = [x[i] for x in out['x_post_kp1'][start:end]]
+#     # state_quant2 = [x[i] for dy in out['x_post_kp1'][start:end]]
 
-#     ax[i]. plot(lkf.t_hist[start:end], pre_state, '-', color='orangered')
-#     ax[i]. plot(lkf.t_hist[start:end], post_state, '-', color='dodgerblue')
+#     ax[i]. plot(lkf.t_hist[start+1:end], state_quant1, '-', color='orangered')
+#     # ax[i]. plot(lkf.t_hist[start:end], post_state, '-', color='dodgerblue')
+
+
+fig, ax = plt.subplots(n, 1, sharex=True)
+start = 0
+end = -1
+for i in range(n):
+    state_quant1 = [x[i] for x in out['x_full_kp1'][start:end]]
+    # state_quant2 = [x[i] for dy in out['x_post_kp1'][start:end]]
+
+    ax[i]. plot(lkf.t_hist[start+1:end], state_quant1, '-', color='orangered')
+    # ax[i]. plot(lkf.t_hist[start:end], post_state, '-', color='dodgerblue')
 
 # plt.show()
 
+lkf.plot_hist()
 
-# lkf.plot_hist()
+"""end LKF 'splorin"""
+
 
 ################################## Tune LKF ####################################
 # TODO

@@ -91,7 +91,7 @@ def Omega_k_eval(dt):
 # Create h(x) = y
 h1 = ((x1 - xs)**2 + (x3 - ys)**2)**(1/2)
 h2 = ((x1 - xs)*(x2 - xdots) + (x3 - ys)*(x4 - ydots))/h1
-h3 = sp.atan((x3 - ys)/(x1 - xs))
+h3 = sp.atan2((x3 - ys),(x1 - xs))
 h = sp.Matrix([[h1, h2, h3]]).T
 h_lam = sp.lambdify([*x, *s], h, 'numpy')
 
