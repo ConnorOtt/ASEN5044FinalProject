@@ -18,11 +18,10 @@ from scipy.linalg import block_diag
 
 # Local imports
 from kf import KF
-from constants import I #dentity
+from constants import I, p
 from system_def import nl_orbit_prop as nom_prop
 
 class LKF(KF):
-
 
     def __init__(self, system):
 
@@ -33,9 +32,7 @@ class LKF(KF):
         self.f = system["f"]
         self.h = system["h"]
 
-
-        # LKF-specific properties, here all of these are static (TODO: verify)
-        self.dx_0 = system['dx_0']
+        # LKF-specific properties, here all of these are static
         self.x_nom_0 = system["x_nom_0"]
         self.delta_t = system["dt"]
         self.u_k = np.zeros((2,))  # no control for now or ever lol
@@ -45,12 +42,6 @@ class LKF(KF):
         self.x_nom_k = self.x_nom_0
         self.x_nom_th = [self.x_nom_0]
 
-        # 'Current' things in the filter (all post meas where applicable)
-        self.dx_k = self.dx_0
-        self.P_k = self.P_0
-        self.x_k = system['x_0']  # this is an estimate
-
-
     def time_update(self, dx_post_k, P_post_k):
         """
         Override the general KF's time update.
@@ -58,7 +49,7 @@ class LKF(KF):
 
         # Do not propagate nominal, it's already caught up from last
         # measurement update
-        x_nom_k = self.x_nom_k
+        x_nom_k = self.x_nom_k # use nom at k to linearize and bring state to kp1
 
         F_k = self.F_func(x_nom_k, self.delta_t)
         G_k = self.G_func(self.delta_t)
@@ -74,13 +65,27 @@ class LKF(KF):
         """
         Override the general KF's measurement update.
         """
+        # Bring the nominal up to evaluate H at kp1
+        x_nom_kp1 = self.__update_nom()  # do this even if there's no measurement
+
         id_list = y_kp1['stationID']
         y_kp1 = y_kp1['meas']
-        if y_kp1 is None:
-            return dx_pre_kp1, P_pre_kp1
+        if y_kp1 is None: # NOTE: this is getting ugly, any ideas?
+            out = {
+                'x_pre_kp1': dx_pre_kp1,
+                'x_post_kp1': dx_pre_kp1,
+                'P_pre_kp1': P_pre_kp1,
+                'P_post_kp1': P_pre_kp1,
+                'pre_fit_residual': [None for _ in range(p)],
+                'post_fit_residual': [None for _ in range(p)],
+                'x_full_kp1':x_nom_kp1 + dx_pre_kp1,
+                'y_kp1': [None for _ in range(p)],
+                'dy_nom_kp1': [None for _ in range(p)],
+                'dy_est_kp1': [None for _ in range(p)],
 
-        # Bring the nominal up to evaluate H at kp1
-        x_nom_kp1 = self.__update_nom()
+            }
+
+            return out
 
         # Evaluate jacobians and Kalman gain on nominal trajectory
         H_kp1 = self.H_func(x_nom_kp1, t_kp1, id_list=id_list)
@@ -90,7 +95,14 @@ class LKF(KF):
 
         # Generate nominal measurement and pre-fit residual
         y_nom_kp1, _ = self.h(x_nom_kp1, t_kp1, id_list=id_list) # nominal measurement
+        
+
+        # TODO: Fix next line, the elevation measurement is not constrained and
+        # sometimes flips to +/- 2*pi rad. H_kp1@dx_pre_kp1 is constrained to be 
+        # around 0 so no worries there. 
         dy_kp1 = y_kp1 - y_nom_kp1
+        # dy_kp1 = self._constrain_angle(dy_kp1_tmp)
+
         pre_fit_residual = dy_kp1 - H_kp1 @ dx_pre_kp1;
 
         # Apply measurement update
@@ -107,6 +119,9 @@ class LKF(KF):
             'post_fit_residual': dy_kp1 - H_kp1 @ dx_post_kp1,
             'x_full_kp1':x_nom_kp1 + dx_post_kp1,
             'y_kp1':y_kp1,
+            'dy_nom_kp1': dy_kp1,
+            'dy_est_kp1': H_kp1 @ dx_pre_kp1,
+
         }
 
         return out
@@ -119,9 +134,14 @@ class LKF(KF):
 
         nom_prop.set_initial_value(self.x_nom_k, 0)
         x_nom_kp1 = nom_prop.integrate(self.delta_t)
-        self.x_nom_th.append(x_nom_kp1)
-        self.x_nom_k = self.x_nom_th[-1]
 
-        return self.x_nom_k
+        self.x_nom_k = x_nom_kp1
+        self.x_nom_th.append(x_nom_kp1)
+
+        return x_nom_kp1
+
+    def __constrain_angle(self, meas):
+
+        pass
 
 

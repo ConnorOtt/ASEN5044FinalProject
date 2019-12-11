@@ -73,15 +73,23 @@ class KF(ABC):
 
         Output is new state estimate (mean and covariance) at time of measurement
         """
-        
-        # Update filter's latest t and y
-        self.t_hist.append(t_kp1)  # current estimate is at t_k when this line goes
-        self.y_hist.append(y_kp1)
+    
+        # t = t_k
+        x_post_k = self.x_hist[-1]
+        P_post_k = self.P_hist[-1]
 
-        x_pre_kp1, P_pre_kp1 = self.time_update(self.x_hist[-1], self.P_hist[-1])
-        out_dict = self.meas_update(x_pre_kp1, P_pre_kp1, y_kp1, t_kp1)
+        # Propagate state estimate and covariance
+        x_pre_kp1, P_pre_kp1 = self.time_update(x_post_k, P_post_k)
+
+        # t = t_{k+1}
 
         # Update filter's state estimate
+        out_dict = self.meas_update(x_pre_kp1, P_pre_kp1, y_kp1, t_kp1)
+
+
+        # Write everything out
+        self.t_hist.append(t_kp1)
+        self.y_hist.append(y_kp1)
         self.x_hist.append(out_dict['x_post_kp1'])
         self.P_hist.append(out_dict['P_post_kp1'])
         self.dict_th.append(out_dict)
@@ -95,7 +103,6 @@ class KF(ABC):
         """
         plot estimate error and 2sigma bounds 
         """
-
         n = self.n
         plt.rcParams['figure.figsize'] = 12, 4*n
         time_unit = None
@@ -105,19 +112,13 @@ class KF(ABC):
         ax[0].set_title(u'State Estimate Error w/ $2\sigma$ Bounds')
         ax[-1].set_xlabel('time, {}'.format(time_unit if time_unit is not None else 's'))
 
-        diagP = [diag(P) for P in self.P_hist]
+        start = 0
+        end = -1
+        diagP = [diag(P) for P in self.P_hist[start:end]]
         for i in range(n):
-            state = [x[i] for x in self.x_hist]
+            state = [x[i] for x in self.x_hist[start:end]]
             two_sig = [2*sqrt(dp[i]) for dp in diagP]
-            ax[i].plot(self.t_hist, state, '-', color='dodgerblue')
-            ax[i].plot(self.t_hist, [(ts, -ts) for ts in two_sig], '--', color='black')
+            ax[i]. plot(self.t_hist[start:end], state, '-', color='dodgerblue')
+            ax[i].plot(self.t_hist[start:end], [(ts, -ts) for ts in two_sig], '--', color='black')
 
         plt.show()
-        # ax1.plot([x[0] - xt[0] for x, xt in zip(x_th, x_kgte0.T)], color='dodgerblue', label='State Estimate')
-        # ax1.plot([2*s[0] for s in P_diag_root], '--', color='black', label='$2\sigma$ Uncertainty\n Bounds')
-        # ax1.plot([-2*s[0] for s in P_diag_root], '--', color='black')
-        # ax1.legend(loc='upper left', bbox_to_anchor=(1, 1))
-        # ax1.set_ylabel('Easting, m')
-
-
-        pass
