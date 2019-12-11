@@ -40,6 +40,7 @@ x_nom_0 = np.array([X0, Y0, X0dot, Y0dot]).T      # Build full n x 1 intial stat
 dx_0 = np.array([0, 0.075, 0, -0.021]).T           # Initial deviation in Ofer's writeup 
 
 # Read in measurements from .mat file
+
 data = loadmat('Assignment/orbitdeterm_finalproj_KFdata.mat')
 
 # Extract measurements (y) and their corresponding station IDs
@@ -51,8 +52,7 @@ for y_k in yraw[1:]: # Ignoring measurement 0
     else:   
         # Make long measurements
         meas, ids = zip(*[(y_k[:3, i], y_k[3, i]) for i in range(int(y_k.shape[1]))])
-        meas = np.concatenate(meas)# .reshape((-1, ))
-        print(meas.shape)
+        meas = np.concatenate(meas)
 
     y_packet = {
         'meas':meas,
@@ -67,20 +67,20 @@ Rtrue = data["Rtrue"]
 # Initialize system
 # NOTE: ~A lot~ Less of this is random values right now
 system = {
-        # Required by KF algo
-        "t_0": tdata[0], 
-        "x_0":x_nom_0 + dx_0,
-        "P_0": 10 * np.ones((n,n)),
-        "Q": Qtrue, 
-        "R": Rtrue, 
-        **dt_jac_eval_funcs, 
-        **ct_nl_funcs,
+    # Required by KF algo
+    "t_0": tdata[0], 
+    "x_0":x_nom_0 + dx_0,
+    "P_0": 1 * np.eye(n),
+    "Q": Qtrue, 
+    "R": Rtrue, 
+    **dt_jac_eval_funcs, 
+    **ct_nl_funcs,
 
-        # LKF specific
-        "x_nom_0":x_nom_0,
-        "dx_0": dx_0, 
-        "dt": 10,
-        }
+    # LKF specific
+    "x_nom_0":x_nom_0,
+    "dx_0": dx_0, 
+    "dt": 10,
+}   
 
 # Instantiate filter for system
 lkf = LKF(system)
@@ -92,8 +92,9 @@ for t_k, y_k in zip(tdata[:num_meas], ydata[:num_meas]):
     # print(t_k, y_k)
     lkf.update(t_k, y_k)
 
+out = lkf.report_hist(['x_post_kp1', 'P_post_kp1'])
 
-
+lkf.plot_hist()
 
 ################################## Tune LKF ####################################
 # TODO
