@@ -12,6 +12,7 @@ Conventions:
 """
 
 
+import numpy as np
 from numpy.linalg import inv
 from numpy import empty, diag, sqrt
 from abc import ABC, abstractmethod
@@ -119,9 +120,7 @@ class KF(ABC):
             ax[i]. plot(self.t_hist[start:end], state, '-', color='dodgerblue')
             #ax[i].plot(self.t_hist[start:end], 
             #        state + [(ts, -ts) for ts in two_sig], '--', color='black')
-            print(np.array(two_sig).shape)
-            #print(state + two_sig)
             ax[i].plot(self.t_hist[start:end], 
-                    state + two_sig, '--', color='black')
+                    [ (s - ts, s + ts) for (s, ts) in zip(state, two_sig)] , '--', color='black')
 
         plt.show()
