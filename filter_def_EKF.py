@@ -12,9 +12,6 @@ Conventions:
 """
 
 
-# TAKE A BREAK FROM THIS ONE AND WORK ON LKF FOR NOW
-
-
 # Standard imports
 from numpy.linalg import inv
 from scipy.integrate import ode

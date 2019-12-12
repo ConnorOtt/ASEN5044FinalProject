@@ -11,12 +11,13 @@ Conventions:
                         predetermined nominal trajectory.
 """
 
-#NOTE: 0% chance that this runs as of now...just throwin around ideas
 
+import numpy as np
 from numpy.linalg import inv
 from numpy import empty, diag, sqrt
 from abc import ABC, abstractmethod
 import matplotlib.pyplot as plt
+from pprint import pprint
 
 plt.rcParams['font.size'] = 16
 plt.rcParams['lines.markersize'] = 12
@@ -57,11 +58,7 @@ class KF(ABC):
 
     def kalman_gain(self, P_pre_kp1, H_kp1, R_kp1):
         # Kalman gain at time t = t_{k+1}
-
-        # NOTE: I implemented the R block diag outside Kalman gain since it's
-        # kind of problem-specific
-
-        K_kp1 = P_pre_kp1@H_kp1.T @ inv(H_kp1@P_pre_kp1@H_kp1.T + R_kp1)
+        K_kp1 = P_pre_kp1 @ H_kp1.T @ inv(H_kp1 @ P_pre_kp1 @ H_kp1.T + R_kp1)
         return K_kp1
 
 
@@ -79,7 +76,8 @@ class KF(ABC):
         P_post_k = self.P_hist[-1]
 
         # Propagate state estimate and covariance
-        x_pre_kp1, P_pre_kp1 = self.time_update(x_post_k, P_post_k)
+        # NOTE: added t_kp1 because EKF needs it at time update
+        x_pre_kp1, P_pre_kp1 = self.time_update(x_post_k, P_post_k, t_kp1)
 
         # t = t_{k+1}
 
@@ -98,6 +96,7 @@ class KF(ABC):
     def report_hist(self, desired_output): 
         """Output time history of everything (requested)"""
         return {k:[el[k] for el in self.dict_th] for k in desired_output}
+
 
     def plot_hist(self, savefig=False):
         """
@@ -118,7 +117,10 @@ class KF(ABC):
         for i in range(n):
             state = [x[i] for x in self.x_hist[start:end]]
             two_sig = [2*sqrt(dp[i]) for dp in diagP]
-            # ax[i]. plot(self.t_hist[start:end], state, '-', color='dodgerblue')
-            ax[i].plot(self.t_hist[start:end], [(ts, -ts) for ts in two_sig], '--', color='black')
+            ax[i]. plot(self.t_hist[start:end], state, '-', color='dodgerblue')
+            #ax[i].plot(self.t_hist[start:end], 
+            #        state + [(ts, -ts) for ts in two_sig], '--', color='black')
+            ax[i].plot(self.t_hist[start:end], 
+                    [ (s - ts, s + ts) for (s, ts) in zip(state, two_sig)] , '--', color='black')
 
         plt.show()
