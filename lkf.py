@@ -67,7 +67,6 @@ class LKF(KF):
         """
         # Bring the nominal up to evaluate H at kp1
         x_nom_kp1 = self.__update_nom()  # do this even if there's no measurement
-
         id_list = y_kp1['stationID']
         y_kp1 = y_kp1['meas']
         if y_kp1 is None: # NOTE: this is getting ugly, any ideas?
@@ -88,7 +87,6 @@ class LKF(KF):
                 'y_pre_est_kp1': none_meas,
                 'y_post_est_kp1': none_meas,
                 'dy_update': none_meas,
-
             }
 
             return out
@@ -101,7 +99,6 @@ class LKF(KF):
 
         # Generate nominal measurement and pre-fit residual
         y_nom_kp1, _ = self.h(x_nom_kp1, t_kp1, id_list=id_list) # nominal measurement
-         
         dy_nom_kp1 = self.__wrap_angle(y_kp1 - y_nom_kp1)  # only operates on y[2]
         dy_est_kp1 = H_kp1 @ dx_pre_kp1
         pre_fit_residual = dy_nom_kp1 - dy_est_kp1;

@@ -72,7 +72,7 @@ system = {
     # Required by KF algo
     "t_0": tdata[0], 
     "x_0": dx_0,
-    "P_0": np.diag([10, 1, 10, 1]), #10 * np.eye(n), #
+    "P_0": np.diag([1, 0.01, 1, 0.01]), #10 * np.eye(n), #
     "Q": Qtrue, 
     "R": Rtrue, 
     **dt_jac_eval_funcs, 

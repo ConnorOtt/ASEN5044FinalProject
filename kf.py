@@ -118,7 +118,7 @@ class KF(ABC):
         for i in range(n):
             state = [x[i] for x in self.x_hist[start:end]]
             two_sig = [2*sqrt(dp[i]) for dp in diagP]
-            ax[i]. plot(self.t_hist[start:end], state, '-', color='dodgerblue')
+            # ax[i]. plot(self.t_hist[start:end], state, '-', color='dodgerblue')
             ax[i].plot(self.t_hist[start:end], [(ts, -ts) for ts in two_sig], '--', color='black')
 
         plt.show()
