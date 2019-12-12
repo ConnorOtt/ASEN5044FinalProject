@@ -3,6 +3,11 @@
 #     pprint(y)
 
 """
+
+"""
+import numpy as np
+
+"""
 out = lkf.report_hist(['y_kp1', 
                         'y_nom_kp1',
                         'dy_update', 
@@ -81,7 +86,10 @@ def test(a, b, *args):
 
 
 if __name__ == "__main__":
-    test(1, 3)
+
+    arr = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+    print(arr)
+    print(arr.T.reshape((-1, )))
 
 
 

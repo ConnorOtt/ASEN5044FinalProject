@@ -13,6 +13,7 @@ import numpy as np
 import numpy.linalg as la
 from math import sin, cos
 from scipy.integrate import ode
+from scipy.stats import multivariate_normal as mvn
 
 # Local imports
 from constants import *
@@ -51,16 +52,18 @@ B_tilde = np.array(f.jacobian(u).tolist()).astype(np.float64)
 Gam_tilde = np.array(f.jacobian(w).tolist()).astype(np.float64)
 
 
-def f_func(t_k, x_k, u_k, w_k):
+def f_func(t_k, x_k, u_k, w_vec):
 	# Nonlinear dynamics function w/ or without noise/control
 
 	if type(x_k) is not np.ndarray:  # for the odd accidental list input
 		x_k = np.array(x_k).reshape((-1, 1))
 		
 	# gotta be a better way to do this: 
-	w_k = w_k if w_k is not None else [0, 0]
 	u_k = u_k if u_k is not None else [0, 0]
 
+	k = int(t_k/delta_t)
+	w_k = w_vec[k] if w_vec is not None else [0, 0]
+	
 	x_dot_k_obj = f_lam(*[*x_k, *u_k, *w_k])
 	x_dot_k = np.array(x_dot_k_obj.tolist()).astype(np.float64)
 
@@ -101,7 +104,7 @@ H_tilde = h.jacobian(x)
 H_tilde_func = sp.lambdify([*x, *s], H_tilde, 'numpy')
 
 # Nonlinear measurement function
-def h_func(x_k, t_k, id_list=None):
+def h_func(x_k, t_k, id_list=None, noise_cov=None):
 
 	"""Nonlinear measurement function - does not include noise
 
@@ -124,10 +127,24 @@ def h_func(x_k, t_k, id_list=None):
 	if len(sites) is 0:
 		return None, None
 	else:
-	   	# Evaluate h(x) = y  
-	   	y_list = [h_lam(*[*x_k, *site]) for site in sites] 
-	   	y = np.concatenate(y_list).reshape((len(y_list)*p, )) # lots of reshaping everywhere - looking for 1d vectors always and 2d matrices
-	   	return y, ids
+		# sample noise if needed,
+		# NOTE: it may be faster to sample all the noise values
+		# at once (outside h_func) and just add it onto a set of 
+		# measurement vectors rather than sample each time this is 
+		# evaluated
+
+		if noise_cov is not None:
+			mnoise = mvn(mean=None, cov=noise_cov).rvs(size=len(ids))
+			mnoise = mnoise.flatten(order='C') # row flatten (C-style) not column flatten
+
+		else:
+			mnoise = np.zeros((len(ids)*p, ))
+
+		# Evaluate h(x) = y  
+		y_list = [h_lam(*[*x_k, *site]) for site in sites]
+		y = np.concatenate(y_list).reshape((len(y_list)*p, )) # lots of reshaping everywhere - looking for 1d vectors always and 2d matrices
+		y = y + mnoise
+		return y, ids
 
 
 def H_k_eval(x_nom_k, t_k, id_list=None):
