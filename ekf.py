@@ -62,6 +62,7 @@ class EKF(KF):
 
         # Nonlinear state propagation
         nl_prop.set_initial_value(x_post_k, t_k)
+        nl_prop.set_f_params(None, None)
         x_pre_kp1 = nl_prop.integrate(t_kp1)
 
         return x_pre_kp1, P_pre_kp1

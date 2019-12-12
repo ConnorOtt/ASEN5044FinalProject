@@ -142,6 +142,7 @@ class LKF(KF):
         """ 
 
         nom_prop.set_initial_value(self.x_nom_k, 0)
+        nom_prop.set_f_params(None, None)  # Not sure if this works yet
         x_nom_kp1 = nom_prop.integrate(self.delta_t)
 
         self.x_nom_k = x_nom_kp1

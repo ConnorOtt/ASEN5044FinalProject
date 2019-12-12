@@ -51,14 +51,15 @@ B_tilde = np.array(f.jacobian(u).tolist()).astype(np.float64)
 Gam_tilde = np.array(f.jacobian(w).tolist()).astype(np.float64)
 
 
-def f_func(t_k, x_k):
-	# Nonlinear dynamics function w/o noise
+def f_func(t_k, x_k, u_k, w_k):
+	# Nonlinear dynamics function w/ or without noise/control
 
 	if type(x_k) is not np.ndarray:  # for the odd accidental list input
 		x_k = np.array(x_k).reshape((-1, 1))
 		
-	u_k=[0, 0]
-	w_k=[0, 0]
+	# gotta be a better way to do this: 
+	w_k = w_k if w_k is not None else [0, 0]
+	u_k = u_k if u_k is not None else [0, 0]
 
 	x_dot_k_obj = f_lam(*[*x_k, *u_k, *w_k])
 	x_dot_k = np.array(x_dot_k_obj.tolist()).astype(np.float64)
