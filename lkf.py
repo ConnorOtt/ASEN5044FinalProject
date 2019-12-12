@@ -42,7 +42,8 @@ class LKF(KF):
         self.x_nom_k = self.x_nom_0
         self.x_nom_th = [self.x_nom_0]
 
-    def time_update(self, dx_post_k, P_post_k):
+
+    def time_update(self, dx_post_k, P_post_k, t_kp1):
         """
         Override the general KF's time update.
         """
@@ -54,6 +55,7 @@ class LKF(KF):
         F_k = self.F_func(x_nom_k, self.delta_t)
         G_k = self.G_func(self.delta_t)
         Omega_k = self.Omega_func(self.delta_t)
+        #print(self.t_hist[-1])
 
         dx_pre_kp1 = F_k @ dx_post_k + G_k @ self.u_k
         P_pre_kp1 = F_k @ P_post_k @ F_k.T + Omega_k @ self.Q_k @ Omega_k.T
@@ -149,6 +151,7 @@ class LKF(KF):
         self.x_nom_th.append(x_nom_kp1)
 
         return x_nom_kp1
+
 
     def __wrap_angle(self, diff):
 
