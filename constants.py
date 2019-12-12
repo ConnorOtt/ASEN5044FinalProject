@@ -15,3 +15,5 @@ delta_t = 10 # s
 mu = 398600 # km**3/s**2
 omegaE = 2*pi / 86400
 I = np.eye(n)
+
+data_dir = './Data/'

@@ -61,6 +61,11 @@ def f_func(t_k, x_k, u_k, w_vec):
 	# gotta be a better way to do this: 
 	u_k = u_k if u_k is not None else [0, 0]
 
+	# NOTE: the following lines accepting ZOH noise input
+	# may be more clean (but slower?) if the noise is sampled
+	# here (from an input Q, see h_func) and the random seed 
+	# is set based on floor(t_k/delta_t) to maintain the same noise 
+	# sample for t_k < t < t_k+delta_t.
 	k = int(t_k/delta_t)
 	w_k = w_vec[k] if w_vec is not None else [0, 0]
 	

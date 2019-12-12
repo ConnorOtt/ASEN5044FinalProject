@@ -71,6 +71,29 @@ for i in range(n):
 # plt.show()
 
 lkf.plot_hist()
+
+plt.rcParams['figure.figsize'] = 12, 4*n
+fig, ax = plt.subplots(n, 1, sharex=True)
+start = 0
+end = -1
+ax[0].set_title('noisey truth trajectories')
+for i in range(n):
+    for traj in truth_trajectories:
+        state_quant1 = [x[i] for x in traj]
+        ax[i]. plot(tvec_sim, state_quant1, '-')
+
+
+plt.rcParams['figure.figsize'] = 12, 4*p
+fig, ax = plt.subplots(p, 1, sharex=True)
+start = 0
+end = -1
+for i in range(p):
+    for traj_meas in truth_measurements:
+        meas_quant1 = [dy[i] for dy in traj_meas]
+        ax[i]. plot(tvec_sim[1:], meas_quant1, '-')
+    
+plt.show()
+
 """
 
 """end LKF 'splorin"""
