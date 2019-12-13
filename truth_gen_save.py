@@ -52,14 +52,17 @@ ass_pickle.close()
 Qtrue = data["Qtrue"]
 Rtrue = data["Rtrue"]
 
-# Creating Monte-Carlo trajectories
+
+
+
+#------------// Creating Monte-Carlo trajectories //-------------------------
 t_0_sim = 0
 t_f_sim = 2*pi * np.sqrt(r0**3 / mu) #* 0.1  # NOTE: The 0.1 of an orbit is for testing
 dt_sim = 10  # s
 tvec_sim = np.arange(t_0_sim, t_f_sim, dt_sim)
 num_step = tvec_sim.shape[0]
 
-N = 1 # 50-100 total trajectories sounds good I guess
+N = 10 # 50-100 total trajectories sounds good I guess
 Q_sim = Qtrue
 R_sim = Rtrue
 p_noise_dist = mvn(mean=[0, 0], cov=Q_sim)

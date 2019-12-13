@@ -107,11 +107,13 @@ class EKF(KF):
         R_kp1 = block_diag(*R_list)
         K_kp1 = self.kalman_gain(P_pre_kp1, H_kp1, R_kp1)
 
+        innov_cov = H_kp1 @ P_pre_kp1 @ H_kp1.T + R_kp1
+
         # Apply measurement update
         x_post_kp1 = x_pre_kp1 + K_kp1 @ nl_innov
         P_post_kp1 = (I - K_kp1 @ H_kp1) @ P_pre_kp1
 
-        y_est_post_km1 = H_kp1 @ x_post_kp1
+        # y_est_post_kp1 = self.h(x_post_kp1, id_list=id_list)
 
         # NOTE: didn't put the time into calculating all of the other things
         out = {
@@ -119,7 +121,10 @@ class EKF(KF):
             'x_post_kp1': x_post_kp1,
             'P_pre_kp1': P_pre_kp1,
             'P_post_kp1': P_post_kp1,
+            
             'y_kp1':y_kp1,
+            'y_pre_kp1':y_pre_kp1,
+            'innov_cov': innov_cov,
         }
 
         return out

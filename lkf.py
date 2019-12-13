@@ -99,6 +99,8 @@ class LKF(KF):
         R_kp1 = block_diag(*R_list)
         K_kp1 = self.kalman_gain(P_pre_kp1, H_kp1, R_kp1)
 
+        innov_cov = H_kp1 @ P_pre_kp1 @ H_kp1.T + R_kp1
+
         # Generate nominal measurement and pre-fit residual
         y_nom_kp1, _ = self.h(x_nom_kp1, t_kp1, id_list=id_list) # nominal measurement
         dy_nom_kp1 = self.__wrap_angle(y_kp1 - y_nom_kp1)  # only operates on y[2]
@@ -130,6 +132,7 @@ class LKF(KF):
             'y_nom_kp1': y_nom_kp1,
             'y_pre_est_kp1': y_nom_kp1 + dy_est_kp1,
             'y_post_est_kp1': y_nom_kp1 + dy_est_post_km1,
+            'innov_cov': innov_cov,
 
         }
 
