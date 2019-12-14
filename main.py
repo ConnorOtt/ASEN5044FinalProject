@@ -117,22 +117,26 @@ NIS_avg = np.mean(np.array(all_NIS), 0)
 plt.rcParams['figure.figsize'] = 12, 6
 fig, ax = plt.subplots(2, 1, sharex=True)
 
-ax[0].plot(NEES_avg[30:], '.', color='dodgerblue')
-ax[1].plot(NIS_avg[30:], '.', color='orangered')
+ax[0].set_title('NEES and NIS tests for LKF')
+ax[0].plot(NEES_avg, '.', color='dodgerblue', label='NEES Results')
+ax[0].legend()
+ax[1].plot(NIS_avg, '.', color='orangered', label='NIS Results')
+ax[1].set_xlabel('time step k')
+ax[1].legend()
 
 # plt.show()
 
 # exit(0)
 
 
-# -------------------------- // Tune LKF // -----------------------------------
+# -------------------------- // Tune LKF // ---------------------------------
 
 
 
 
 
 
-# ------------- //  Verify that EKF works correctly // ------------------------
+# ------------- //  Perform NEES/NIS tests on EKF // ------------------------
 
 
 # Initialize system
@@ -142,7 +146,7 @@ system = {
     "x_0": x_nom_0 + dx_0,
     "P_0": P_0,
     "Q": Qtrue*10, 
-    "R": Rtrue, 
+    "R": Rtrue*10, 
     **dt_jac_eval_funcs, 
     **ct_nl_funcs,
 
@@ -192,9 +196,12 @@ NIS_avg = np.mean(np.array(all_NIS), 0)
 
 plt.rcParams['figure.figsize'] = 12, 6
 fig, ax = plt.subplots(2, 1, sharex=True)
-
-ax[0].plot(NEES_avg[30:], '.', color='dodgerblue')
-ax[1].plot(NIS_avg[30:], '.', color='orangered')
+ax[0].set_title('NEES and NIS tests for EKF')
+ax[0].plot(NEES_avg, '.', color='dodgerblue', label='NEES Results')
+ax[0].legend()
+ax[1].plot(NIS_avg, '.', color='orangered', label='NIS Results')
+ax[1].set_xlabel('time step k')
+ax[1].legend()
 
 plt.show()
 

@@ -62,7 +62,7 @@ dt_sim = 10  # s
 tvec_sim = np.arange(t_0_sim, t_f_sim, dt_sim)
 num_step = tvec_sim.shape[0]
 
-N = 10 # 50-100 total trajectories sounds good I guess
+N = 10ra # 50-100 total trajectories sounds good I guess
 Q_sim = Qtrue
 R_sim = Rtrue
 p_noise_dist = mvn(mean=[0, 0], cov=Q_sim)
