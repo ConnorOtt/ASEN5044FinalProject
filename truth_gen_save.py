@@ -19,9 +19,13 @@ Y0 = 0                                          # [km]
 X0dot = 0                                       # [km/s]
 Y0dot = r0 * np.sqrt(mu/r0**3)                     # [km/s]
 x_nom_0 = np.array([r0, X0dot, Y0, Y0dot])      # Nominal full n x 1 nominal state at t_0
-P_0 = np.diag([0.001, 0.0001, 0.001, 0.0001])
+P_0 = np.diag([0.1, 0.01, 0.1, 0.01])
+dx_0 = mvn(mean=None, cov=P_0).rvs(random_state=13131)
+# P_0 = np.diag([0.001, 0.0001, 0.001, 0.0001])
 # dx_0 = mvn(mean=None, cov=P_0).rvs(random_state=13131)
-dx_0 = np.array([1e-4, 1e-5, 1e-4, 1e-5])
+# dx_0 = np.array([1e-4, 1e-5, 1e-4, 1e-5])
+# dx_0 = np.array([0, 0, 0, 0])
+
 
 # Read in measurements from .mat file
 data = loadmat('Assignment/orbitdeterm_finalproj_KFdata.mat')
@@ -53,19 +57,17 @@ Qtrue = data["Qtrue"]
 Rtrue = data["Rtrue"]
 
 
-
-
 #------------// Creating Monte-Carlo trajectories //-------------------------
 t_0_sim = 0
-t_f_sim = 2*pi * np.sqrt(r0**3 / mu) #* 0.1  # NOTE: The 0.1 of an orbit is for testing
+t_f_sim = 2*pi * np.sqrt(r0**3 / mu) * 0.3  # NOTE: The 0.1 of an orbit is for testing
 dt_sim = 10  # s
 tvec_sim = np.arange(t_0_sim, t_f_sim, dt_sim)
 num_step = tvec_sim.shape[0]
 
-N = 10ra # 50-100 total trajectories sounds good I guess
-Q_sim = Qtrue
+N = 10 # 50-100 total trajectories sounds good I guess
+W_sim = Qtrue
 R_sim = Rtrue
-p_noise_dist = mvn(mean=[0, 0], cov=Q_sim)
+p_noise_dist = mvn(mean=[0, 0], cov=W_sim)
 
 truth_trajectories = []
 truth_measurements = []

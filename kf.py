@@ -108,7 +108,7 @@ class KF(ABC):
 
         # Create subplots for each state with 2-sigma bounds
         fig, ax = plt.subplots(n, 1, sharex=True)
-        ax[0].set_title(u'State Estimate Error w/ $2\sigma$ Bounds')
+        ax[0].set_title(u'State Estimate w/ $2\sigma$ Bounds')
         ax[-1].set_xlabel('time, {}'.format(time_unit if time_unit is not None else 's'))
 
         start = 0
@@ -120,7 +120,7 @@ class KF(ABC):
             ax[i]. plot(self.t_hist[start:end], state, '-', color='dodgerblue')
             #ax[i].plot(self.t_hist[start:end], 
             #        state + [(ts, -ts) for ts in two_sig], '--', color='black')
-            ax[i].plot(self.t_hist[start:end], 
-                    [ (s - ts, s + ts) for (s, ts) in zip(state, two_sig)] , '--', color='black')
+            # ax[i].plot(self.t_hist[start:end], 
+                    # [(s - ts, s + ts) for (s, ts) in zip(state, two_sig)] , '--', color='black')
 
         plt.show()

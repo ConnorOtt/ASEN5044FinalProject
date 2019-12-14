@@ -141,13 +141,12 @@ def h_func(x_k, t_k, id_list=None, noise_cov=None):
 		if noise_cov is not None:
 			mnoise = mvn(mean=None, cov=noise_cov).rvs(size=len(ids))
 			mnoise = mnoise.flatten(order='C') # row flatten (C-style) not column flatten
-
 		else:
 			mnoise = np.zeros((len(ids)*p, ))
 
 		# Evaluate h(x) = y  
 		y_list = [h_lam(*[*x_k, *site]) for site in sites]
-		y = np.concatenate(y_list).reshape((len(y_list)*p, )) # lots of reshaping everywhere - looking for 1d vectors always and 2d matrices
+		y = np.concatenate(y_list).reshape((-1, )) # lots of reshaping everywhere - looking for 1d vectors always and 2d matrices
 		y = y + mnoise
 		return y, ids
 
@@ -161,7 +160,7 @@ def H_k_eval(x_nom_k, t_k, id_list=None):
 	
 	"""
 	if type(x_nom_k) is not np.ndarray:  # for the odd accidental list input
-		x_k = np.array(x_k).reshape((-1, 1))
+		x_nom_k = np.array(x_k).reshape((-1, ))
 
 	sites, _ = get_vis_sites(x_nom_k, t_k, id_list=id_list)
 

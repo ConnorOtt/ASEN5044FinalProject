@@ -55,7 +55,6 @@ class LKF(KF):
         F_k = self.F_func(x_nom_k, self.delta_t)
         G_k = self.G_func(self.delta_t)
         Omega_k = self.Omega_func(self.delta_t)
-        #print(self.t_hist[-1])
 
         dx_pre_kp1 = F_k @ dx_post_k + G_k @ self.u_k
         P_pre_kp1 = F_k @ P_post_k @ F_k.T + Omega_k @ self.Q_k @ Omega_k.T
@@ -71,6 +70,7 @@ class LKF(KF):
         x_nom_kp1 = self.__update_nom()  # do this even if there's no measurement
         id_list = y_kp1['stationID']
         y_kp1 = y_kp1['meas']
+
         if y_kp1 is None: # NOTE: this is getting ugly, any ideas?
             none_meas = [None for _ in range(p)]
             out = {
@@ -116,7 +116,7 @@ class LKF(KF):
         out = {
             'x_pre_kp1': dx_pre_kp1,
             'x_post_kp1': dx_post_kp1,
-            'x_full_kp1':x_nom_kp1 + dx_post_kp1,
+            'x_full_kp1': x_nom_kp1 + dx_post_kp1,
             'x_update': K_kp1 @ pre_fit_residual,
 
             'P_pre_kp1': P_pre_kp1,
