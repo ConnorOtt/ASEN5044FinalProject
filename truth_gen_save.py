@@ -44,8 +44,9 @@ Rtrue = data["Rtrue"]
 
 
 #------------// Creating Monte-Carlo trajectories //-------------------------
+num_orbits_sim = 3.0 
 t_0_sim = 0
-t_f_sim = 2*pi * np.sqrt(r0**3 / mu) * 0.3  # NOTE: The 0.1 of an orbit is for testing
+t_f_sim = 2*pi * np.sqrt(r0**3 / mu) * num_orbits_sim  # NOTE: The 0.1 of an orbit is for testing
 dt_sim = 10  # s
 tvec_sim = np.arange(t_0_sim, t_f_sim, dt_sim)
 num_step = tvec_sim.shape[0]

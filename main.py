@@ -57,7 +57,7 @@ system = {
     "t_0": t_0, 
     "x_0": dx_est_0,
     "P_0": P_0,
-    "Q": Qtrue*100, 
+    "Q": Qtrue, 
     "R": Rtrue, 
     **dt_jac_eval_funcs, 
     **ct_nl_funcs,
@@ -94,14 +94,14 @@ for i in range(num_traj):
     report = lkf.report_hist(report_fields)
 
     y_vecs = report['y_kp1']
-    #y_est_pre = report['y_pre_est_kp1']
-    y_est_pre = report['y_post_est_kp1']
+    y_est_pre = report['y_pre_est_kp1']
+    #y_est_pre = report['y_post_est_kp1']
     innov_cov = report['innov_cov']
 
     full_est = report['x_full_kp1']
     state_cov = report['P_post_kp1']
 
-    state_resid_i = [xt for xt, xe in zip(truth_traj_i, full_est)]
+    state_resid_i = [xt - xe for xt, xe in zip(truth_traj_i[1:], full_est)]
     meas_resid_i = [y - y_pre for y, y_pre in zip(y_vecs, y_est_pre)]
 
     nees_vec_i = [ex.T @ inv(P) @ ex for ex, P in zip(state_resid_i, state_cov)]
@@ -125,13 +125,13 @@ plt.rcParams['figure.figsize'] = 12, 6
 fig, ax = plt.subplots(2, 1, sharex=True)
 
 ax[0].set_title('NEES and NIS tests for LKF')
-#ax[0].plot([nees for nees in np.array(all_NEES).T], '.', color='orangered', label='NEES Results')
-ax[0].plot(np.array(state_resid_i).T[0], '.')
-ax[0].plot(np.array(state_resid_i).T[1], '.')
-ax[0].plot(np.array(state_resid_i).T[2], '.')
-ax[0].plot(np.array(state_resid_i).T[3], '.')
-#ax[0].axhline(bounds_NEES[0], linestyle='--', color='black')
-#ax[0].axhline(bounds_NEES[1])#, linestyle='--', color='black')
+ax[0].plot([nees for nees in np.array(all_NEES).T], '.', color='orangered', label='NEES Results')
+#ax[0].plot(np.array(state_resid_i).T[0], '.')
+#ax[0].plot(np.array(state_resid_i).T[1], '.')
+#ax[0].plot(np.array(state_resid_i).T[2], '.')
+#ax[0].plot(np.array(state_resid_i).T[3], '.')
+ax[0].axhline(bounds_NEES[0], linestyle='--', color='black')
+ax[0].axhline(bounds_NEES[1])#, linestyle='--', color='black')
 # ax[0].legend()
 
 
@@ -144,7 +144,6 @@ ax[1].axhline(bounds_NIS[1])#, linestyle='--', color='black')
 
 plt.show()
 
-exit(0)
 
 
 # -------------------------- // Tune LKF // ---------------------------------
@@ -163,8 +162,8 @@ system = {
     "t_0": t_0, 
     "x_0": x_nom_0,
     "P_0": P_0,
-    "Q": Qtrue*10, 
-    "R": Rtrue*10, 
+    "Q": Qtrue, 
+    "R": Rtrue, 
     **dt_jac_eval_funcs, 
     **ct_nl_funcs,
 
@@ -196,11 +195,11 @@ for i in range(num_traj):
     full_est = report['x_post_kp1']
     state_cov = report['P_post_kp1']
 
+    state_resid_i = [xt - xe for xt, xe in zip(truth_traj_i[1:], full_est)]
     meas_resid_i = [y - y_pre for y, y_pre in zip(y_vecs, y_est_pre)]
-    state_resid_i = [xt - xe for xt, xe in zip(truth_traj_i, full_est)]
 
-    nees_vec_i = [ex.T @ P @ ex for ex, P in zip(state_resid_i, state_cov)]
-    nis_vec_i = [ey.T @ S @ ey for ey, S in zip(meas_resid_i, innov_cov)]
+    nees_vec_i = [ex.T @ inv(P) @ ex for ex, P in zip(state_resid_i, state_cov)]
+    nis_vec_i = [ey.T @ inv(S) @ ey for ey, S in zip(meas_resid_i, innov_cov)]
 
     all_NEES.append(nees_vec_i)
     all_NIS.append(nis_vec_i)
