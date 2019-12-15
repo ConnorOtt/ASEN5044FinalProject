@@ -125,11 +125,10 @@ def h_func(x_k, t_k, id_list=None, noise_cov=None):
 
 	"""
 
-	if type(x_k) is not np.ndarray:  # for the odd accidental list input
-		x_k = np.array(x_k).reshape((-1, 1))
+	x_k = np.array(x_k).reshape((-1,))
 
 	sites, ids = get_vis_sites(x_k, t_k, id_list=id_list)
-	if len(sites) is 0:
+	if len(sites) == 0:
 		return None, None
 	else:
 		# sample noise if needed,
@@ -164,7 +163,7 @@ def H_k_eval(x_nom_k, t_k, id_list=None):
 
 	sites, _ = get_vis_sites(x_nom_k, t_k, id_list=id_list)
 
-	if len(sites) is not 0:
+	if len(sites) != 0:
 		H_k = [H_tilde_func(*[*x_nom_k, *xs]) for xs in sites]
 		return np.concatenate(H_k).astype(np.float64)
 	else: 
@@ -183,6 +182,7 @@ def get_vis_sites(x_k, t_k, id_list=None):
 		if stations are visible and return an empty list otherwise
 
 	"""
+
 
 	x1 = x_k[0]
 	x3 = x_k[2]

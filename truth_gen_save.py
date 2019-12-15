@@ -13,20 +13,6 @@ from system_def import h_func
 from constants import *
 
 
-# Initial state
-X0 = 6678                                       # [km]
-Y0 = 0                                          # [km]
-X0dot = 0                                       # [km/s]
-Y0dot = r0 * np.sqrt(mu/r0**3)                     # [km/s]
-x_nom_0 = np.array([r0, X0dot, Y0, Y0dot])      # Nominal full n x 1 nominal state at t_0
-P_0 = np.diag([0.1, 0.01, 0.1, 0.01])
-dx_0 = mvn(mean=None, cov=P_0).rvs(random_state=13131)
-# P_0 = np.diag([0.001, 0.0001, 0.001, 0.0001])
-# dx_0 = mvn(mean=None, cov=P_0).rvs(random_state=13131)
-# dx_0 = np.array([1e-4, 1e-5, 1e-4, 1e-5])
-# dx_0 = np.array([0, 0, 0, 0])
-
-
 # Read in measurements from .mat file
 data = loadmat('Assignment/orbitdeterm_finalproj_KFdata.mat')
 
@@ -79,7 +65,7 @@ for _ in range(N):
     # restart the sim
     noisey_traj = [x_nom_0 + dx_0]
     noisey_meas = []  # measurements for k >= 1
-    nlop.set_initial_value(x_nom_0 + dx_0, t_0_sim).set_f_params(None, p_noise)
+    nlop.set_initial_value(noisey_traj, t_0_sim).set_f_params(None, p_noise)
     for k in range(1, num_step):
         nlop.integrate(tvec_sim[k])
         noisey_traj.append(nlop.y)

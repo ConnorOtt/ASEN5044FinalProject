@@ -122,9 +122,9 @@ class EKF(KF):
             'P_pre_kp1': P_pre_kp1,
             'P_post_kp1': P_post_kp1,
             
-            'y_kp1':y_kp1,
-            'y_pre_kp1':y_pre_kp1,
-            'innov_cov': innov_cov,
+            'y_kp1': y_kp1,
+            'y_pre_kp1': y_pre_kp1,
+            'innov_cov': innov_cov
         }
 
         return out

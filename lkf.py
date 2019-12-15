@@ -20,6 +20,7 @@ from scipy.linalg import block_diag
 from kf import KF
 from constants import I, n, p, pi
 from system_def import nl_orbit_prop as nom_prop
+from pprint import pprint
 
 class LKF(KF):
 
@@ -98,6 +99,18 @@ class LKF(KF):
         R_list = [self.R_kp1 for _ in range(int(H_kp1.shape[0]/3))]
         R_kp1 = block_diag(*R_list)
         K_kp1 = self.kalman_gain(P_pre_kp1, H_kp1, R_kp1)
+
+        """
+        print("New time")
+        print(t_kp1)
+
+        print("K")
+        pprint(K_kp1)
+        print("R")
+        pprint(R_kp1)
+        print("P")
+        pprint(P_pre_kp1)
+        """
 
         innov_cov = H_kp1 @ P_pre_kp1 @ H_kp1.T + R_kp1
 
