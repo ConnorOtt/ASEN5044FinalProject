@@ -65,7 +65,7 @@ for _ in range(N):
     # restart the sim
     noisey_traj = [x_nom_0 + dx_0]
     noisey_meas = []  # measurements for k >= 1
-    nlop.set_initial_value(noisey_traj, t_0_sim).set_f_params(None, p_noise)
+    nlop.set_initial_value(noisey_traj[0], t_0_sim).set_f_params(None, p_noise)
     for k in range(1, num_step):
         nlop.integrate(tvec_sim[k])
         noisey_traj.append(nlop.y)
