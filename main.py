@@ -68,7 +68,7 @@ system = {
 }   
 
 report_fields = ['x_full_kp1', 'P_post_kp1', 'y_kp1', 
-                'y_pre_est_kp1', 'innov_cov', 'y_post_est_kp1']
+                'y_pre_est_kp1', 'innov_cov']
 num_traj = len(truth_trajectories)
 
 # Get 95% confidence bounds - NIS/NEES
@@ -95,7 +95,6 @@ for i in range(num_traj):
 
     y_vecs = report['y_kp1']
     y_est_pre = report['y_pre_est_kp1']
-    #y_est_pre = report['y_post_est_kp1']
     innov_cov = report['innov_cov']
 
     full_est = report['x_full_kp1']
@@ -105,8 +104,13 @@ for i in range(num_traj):
     meas_resid_i = [y - y_pre for y, y_pre in zip(y_vecs, y_est_pre)]
 
     nees_vec_i = [ex.T @ inv(P) @ ex for ex, P in zip(state_resid_i, state_cov)]
-    nis_vec_i = [ey.T @ inv(S) @ ey for ey, S in zip(meas_resid_i, innov_cov)]
-
+    nis_vec_i = []
+    for ey, S in zip(meas_resid_i, innov_cov):
+        epsilon = ey.T @ inv(S) @ ey
+        if ey.shape[0] > p:
+            epsilon = epsilon / 2
+        nis_vec_i.append(epsilon)
+    
     all_NEES.append(nees_vec_i)
     all_NIS.append(nis_vec_i)
 
@@ -181,8 +185,13 @@ for i in range(num_traj):
     meas_resid_i = [y - y_pre for y, y_pre in zip(y_vecs, y_est_pre)]
 
     nees_vec_i = [ex.T @ inv(P) @ ex for ex, P in zip(state_resid_i, state_cov)]
-    nis_vec_i = [ey.T @ inv(S) @ ey for ey, S in zip(meas_resid_i, innov_cov)]
-
+    nis_vec_i = []
+    for ey, S in zip(meas_resid_i, innov_cov):
+        epsilon = ey.T @ inv(S) @ ey
+        if ey.shape[0] > p:
+            epsilon = epsilon / 2
+        nis_vec_i.append(epsilon)
+    
     all_NEES.append(nees_vec_i)
     all_NIS.append(nis_vec_i)
 
