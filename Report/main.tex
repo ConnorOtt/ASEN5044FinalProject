@@ -137,6 +137,10 @@ Figure \ref{fig:neesnis_lkf} corroborates these findings, and solidifies our und
 
 
 \subsection{The Extended Kalman Filter}
+The EKF relies less on linearizations about an initial nominal trajectory.
+Instead of linearly propagating a deviation in a state, the EKF uses full nonlinear dynamics to propagate its full current state estimate. 
+It then linearizes about its current estimate, rather than the initial nominal trajectory to perform time and measurement updates to the covariance.   
+This allows the EKF to adjust for small perturbations from the nominal that may grow into large devations with time, as it does not use the nominal trajectory for linearization. 
 Figure \ref{fig:ekf_est} shows a time history of a typical EKF estimate. 
 The EKF, in contrast with the LKF, is much more capable of tracking the perturbed trajectory.  
 
@@ -164,9 +168,22 @@ Becuase the EKF continuously updates its internal 'nominal' trajectory, it's abl
 This results in the filter's ability to keep up with the deviations from the original nominal trajectory, and estimate the truth trajectory accurately.
 
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% CONCLUSION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
+
+
+
+\section{Advanced Questions}
+
+\subsection{Bugs}
+Crawling on our laptop screen \\
+underneath our keyboard's keys \\
+\texttt{clc, clear} and \texttt{close} \\
+just end us now. Please, bugs, please. \\
+ 
+\subsection{The Unscented Kalman Filter}
+
+
 
 
 
