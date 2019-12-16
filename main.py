@@ -68,7 +68,8 @@ system = {
 }   
 
 report_fields = ['x_full_kp1', 'P_post_kp1', 'y_kp1', 
-                'y_pre_est_kp1', 'innov_cov']
+                'y_pre_est_kp1', 'innov_cov', 'x_nom_kp1',
+                'y_nom_kp1']
 num_traj = len(truth_trajectories)
 
 # Get 95% confidence bounds - NIS/NEES
@@ -119,14 +120,16 @@ for i in range(num_traj):
 avg_NEES = np.mean(np.array(all_NEES), 0)
 avg_NIS = np.mean(np.array(all_NIS), 0)
 
-plt.rcParams['figure.figsize'] = 12, 6
-fig, ax = plt.subplots(2, 1, sharex=True)
+plt.rcParams['font.size'] = 20
+plt.rcParams['figure.figsize'] = 16, 10
 
+fig, ax = plt.subplots(2, 1, sharex=True)
 ax[0].set_title('NEES and NIS tests for LKF')
 ax[0].plot(avg_NEES, '.', color='orangered', label='NEES Results')
 ax[0].axhline(bounds_NEES[0], linestyle='--', color='black')
 ax[0].axhline(bounds_NEES[1], linestyle='--', color='black')
 ax[0].set_ylim([0, 10])
+ax[0].autoscale(enable=True, axis='x', tight=True)
 ax[0].legend()
 
 ax[1].plot(avg_NIS, '.', color='dodgerblue', label='NIS Results')
@@ -134,9 +137,69 @@ ax[1].set_xlabel('time step k')
 ax[1].axhline(bounds_NIS[0], linestyle='--', color='black')
 ax[1].axhline(bounds_NIS[1], linestyle='--', color='black')
 ax[1].set_ylim([0, 10])
+ax[1].autoscale(enable=True, axis='x', tight=True)
 ax[1].legend()
 
 fig.savefig(fig_dir + 'NEESNIS_lkf.png')
+
+
+# Plot that last one to get an idea of the state and measurement residuals
+fig, ax = plt.subplots(n, 1, sharex=True)
+ax[0].set_title('Typical Noisey Truth Trajectory')
+for i in range(n):
+    state_quant1 = [x[i] for x in truth_traj_i]
+    state_quant2 = [x[i] for x in report['x_nom_kp1']]
+    ax[i].plot(state_quant1, '-', color='dodgerblue', label='Noisey')
+    ax[i].plot(state_quant2, '-', color='orangered', label='Noiseless')
+    ax[i].set_ylabel('$x_{%d}$' % (i+1))
+    ax[i].autoscale(enable=True, axis='x', tight=True)
+ax[0].legend(loc='upper right')
+ax[-1].set_xlabel('time step')
+fig.savefig(fig_dir + 'noisey_truth.png')
+
+
+fig, ax = plt.subplots(p, 1, sharex=True)
+ax[0].set_title('Typical Noisey Measurements')
+for i in range(p):
+    quant1 = [y['meas'][i] for y in truth_meas_i]
+    quant2 = [y[i] for y in report['y_nom_kp1']]
+    ax[i].plot(quant1, '-', color='dodgerblue', label='Noisey')
+    ax[i].plot(quant2, '-', color='orangered', label='Noiseless')
+    ax[i].set_ylabel('$y_{%d}$' % (i+1))
+    ax[i].autoscale(enable=True, axis='x', tight=True)
+ax[-1].set_xlabel('time step')
+ax[0].legend(loc='upper right')
+fig.savefig(fig_dir + 'noisey_meas.png')
+
+
+fig, ax = plt.subplots(n, 1, sharex=True)
+ax[0].set_title('State Errors and 2$\sigma$ Bounds - LKF')
+for i in range(n):
+    state_quant1 = [x[i] for x in state_resid_i]
+    state_quant2 = [(2*np.sqrt(P[i, i]), -2*np.sqrt(P[i, i])) for P in report['P_post_kp1']]
+    ax[i].plot(state_quant1[:100], '-', color='dodgerblue', label='Estimate Error')
+    ax[i].plot(state_quant2[:100], '--', color='black')
+    ax[i].set_ylabel('$x_{%d}$' % (i+1))
+    ax[i].autoscale(enable=True, axis='x', tight=True)
+ax[0].plot([None], '--', label='2$\sigma$ Bounds')
+ax[0].legend(loc='upper right')
+ax[-1].set_xlabel('time step')
+fig.savefig(fig_dir + 'lkf_estimate_th_ZOOM.png')
+
+
+fig, ax = plt.subplots(n, 1, sharex=True)
+ax[0].set_title('State Errors and 2$\sigma$ Bounds - LKF')
+for i in range(n):
+    state_quant1 = [x[i] for x in state_resid_i]
+    state_quant2 = [(2*np.sqrt(P[i, i]), -2*np.sqrt(P[i, i])) for P in report['P_post_kp1']]
+    ax[i].plot(state_quant1, '-', color='dodgerblue', label='Estimate Error')
+    ax[i].plot(state_quant2, '--', color='black')
+    ax[i].set_ylabel('$x_{%d}$' % (i+1))
+    ax[i].autoscale(enable=True, axis='x', tight=True)
+ax[0].plot([None], '--', label='2$\sigma$ Bounds')
+ax[0].legend(loc='upper left')
+ax[-1].set_xlabel('time step')
+fig.savefig(fig_dir + 'lkf_estimate_th.png')
 
 
 
@@ -200,13 +263,13 @@ for i in range(num_traj):
 NEES_avg = np.mean(np.array(all_NEES), 0)
 NIS_avg = np.mean(np.array(all_NIS), 0)
 
-plt.rcParams['figure.figsize'] = 12, 6
 fig, ax = plt.subplots(2, 1, sharex=True)
 ax[0].set_title('NEES and NIS tests for EKF')
 ax[0].plot(NEES_avg, '.', color='orangered', label='NEES Results')
 ax[0].axhline(bounds_NEES[0], linestyle='--', color='black')
 ax[0].axhline(bounds_NEES[1], linestyle='--', color='black')
 ax[0].set_ylim([0, 10])
+ax[0].autoscale(enable=True, axis='x', tight=True)
 ax[0].legend()
 
 ax[1].plot(NIS_avg, '.', color='dodgerblue', label='NIS Results')
@@ -214,9 +277,25 @@ ax[1].axhline(bounds_NIS[0], linestyle='--', color='black')
 ax[1].axhline(bounds_NIS[1], linestyle='--', color='black')
 ax[1].set_xlabel('time step k')
 ax[1].set_ylim([0, 10])
+ax[1].autoscale(enable=True, axis='x', tight=True)
 ax[1].legend()
-
 fig.savefig(fig_dir + 'NEESNIS_ekf.png')
+
+
+fig, ax = plt.subplots(n, 1, sharex=True)
+ax[0].set_title('State Errors and 2$\sigma$ Bounds - EKF')
+for i in range(n):
+    state_quant1 = [x[i] for x in state_resid_i]
+    state_quant2 = [(2*np.sqrt(P[i, i]), -2*np.sqrt(P[i, i])) for P in report['P_post_kp1']]
+    ax[i].plot(state_quant1, '-', color='dodgerblue', label='Estimate Error')
+    ax[i].plot(state_quant2, '--', color='black')
+    ax[i].set_ylabel('$x_{%d}$' % (i+1))
+    ax[i].autoscale(enable=True, axis='x', tight=True)
+ax[0].plot([None], '--', label='2$\sigma$ Bounds')
+ax[0].legend(loc='upper right')
+ax[-1].set_xlabel('time step')
+fig.savefig(fig_dir + 'ekf_estimate_th.png')
+
 
 plt.show()
 

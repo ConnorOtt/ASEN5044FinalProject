@@ -4,7 +4,7 @@
 \usepackage{graphicx}			% including figures
 \usepackage{float}			% placing figures at specific location
 \usepackage{amssymb}			% math symbols
-\usepackage{soul}			% for highlighting
+\usepackage{color, soul}			% for highlighting
 \usepackage{mathtools}			% for text over equals sign
 \newcommand\ivtequal{\stackrel{\mathclap{\normalfont\scriptsize\mbox{FVT}}}{=}}
 % \usepackage{./use/mcode}		% for including code
@@ -82,7 +82,48 @@ As the perturbed orbit drifts further and further from the nominal orbit, the li
 \section{Nonlinear Filtering}
 
 \subsection{The Linearized Kalman Filter}
-The following are results of NEES and NIS chi-square tests for an implementation of the LKF. \hl{list specs of the sim here when the final figures go in.}
+The LKF revolves around the concept of linearizing dynamics and measurement functions around a nominal trajectory at discrete time steps in the filter. 
+This has its benefits in terms of simplicity and computational load, but suffers in terms of accuracy with relatively large deviations from the nominal trajectory. 
+Figures \ref{fig:noisey_states} and \ref{fig:noisey_meas} show a typical noisey truth trajectory and accompanying noisey measurements as compared to the nominal, noiseless trajectory and measurements.  
+Figure \ref{fig:lkf_est_zoom} shows the LKF estimate error and uncertainty bounds for the first 100 time steps (1e4 seconds) of the simulation. 
+The filter performs adequately for these first 100 time steps.
+However, as time goes on, and the truth trajectory deviates further from the nominal, the LKF is unable to estimate an accurate trajectory. 
+Figure \ref{fig:lkf_est} shows the rapidly deriorating estimate error in the LKF.  
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{Figures/noisey_truth.png}
+	\caption{Typical noisey trajecotory as compared to the nominal, noiseless trajectory.}
+	\label{fig:noisey_states}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{Figures/noisey_meas.png}
+	\caption{Typical noisey measurements as compared to the nominal, noiseless measurements.}
+	\label{fig:noisey_meas}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{Figures/lkf_estimate_th_ZOOM.png}
+	\caption{Typical LKF estimate for first 100 time steps (1e4 seconds or $\approx$1/5 of an orbit.)}
+	\label{fig:lkf_est_zoom}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{Figures/lkf_estimate_th.png}
+	\caption{Typical LKF estimate for entire simulation.}
+	\label{fig:lkf_est}
+\end{figure}
+
+\subsubsection{NEES and NIS Tests}
+The following are results of NEES and NIS chi-square tests for an implementation of the LKF. 
+\hl{list specs of the sim here when the final figures go in.} 
+In the following figures, we plot NEES and NIS values from the filter at time k, averaged over N simulated trajectories. 
+At each time step, the NEES and NIS values are expected to fall into 4 (NEES) or 3 (NIS) degree of freedom $\mathcal{X}^2$ distributions. 
+As such, we expect values to fall within some range of the expecation of these distributions. 
+For this study, we've chosen 95\% confidence bounds, which are denoted with the dotted black lines. 
 
 \begin{figure}[H]
 	\centering
@@ -91,10 +132,36 @@ The following are results of NEES and NIS chi-square tests for an implementation
 	\label{fig:neesnis_lkf}
 \end{figure}
 
-The findings in Section I indicated that the linearized dynamics used in the LFK become invalid as small perturbations pull the estimate from the nominal trajectory. 
+The findings in Section I indicated that the linearized dynamics used in the LFK become invalid as small initial perturbations eventually cause large deviations from the nominal trajectory. 
 Figure \ref{fig:neesnis_lkf} corroborates these findings, and solidifies our understanding of where the LKF is most capable, for small perturbations near the nominal trajectory.  
 
 
+\subsection{The Extended Kalman Filter}
+Figure \ref{fig:ekf_est} shows a time history of a typical EKF estimate. 
+The EKF, in contrast with the LKF, is much more capable of tracking the perturbed trajectory.  
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{Figures/ekf_estimate_th.png}
+	\caption{EKF error estimate over the entire simulation period. }
+	\label{fig:neesnis_ekf}
+\end{figure}
+
+
+\subsubsection{NEES and NIS Tests}
+Figure \ref{fig:neesnis_ekf} shows the NEES and NIS results for the EKF.
+These results were generated using the same noisey trajectories and measurements as used for the LKF. 
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{./Figures/NEESNIS_ekf.png}
+	\caption{NEES and NIS chi-square results over time for N= \hl{N} simulated trajectories.}
+	\label{fig:ekf_est}
+\end{figure}
+
+These results show the estimate tracking the truth trajectory more accurately for the duration of the simulations. 
+Becuase the EKF continuously updates its internal 'nominal' trajectory, it's able to latch on to the perturbed trajectory and doesn't rely on stale information from the original nominal trajectory. 
+This results in the filter's ability to keep up with the deviations from the original nominal trajectory, and estimate the truth trajectory accurately.
 
 
 

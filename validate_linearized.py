@@ -90,8 +90,8 @@ for x, y in zip(x_nom, y_nom):
 
 # Plot the nonlinear perturbation and the linear perturbations over time
 
-plt.rcParams['font.size'] = 20
-plt.rcParams['figure.figsize'] = 20, 7
+plt.rcParams['font.size'] = 24
+plt.rcParams['figure.figsize'] = 16, 12
 fig, ax = plt.subplots(n, 1, sharex=True)
 
 ax[0].set_title('Comparison between nonlinear and linear perturbaton propagation')
@@ -101,25 +101,24 @@ for i in range(n):
     state_quant2 = [x[i] for x in dx]
     ax[i].plot(state_quant1, '-', color='dodgerblue', label=u'$\delta x_{nonlinear}$')
     ax[i].plot(state_quant2, '-', color='orangered', label=u'$\delta x_{linear}$')
+    ax[i].autoscale(enable=True, axis='x', tight=True)
     ax[i].set_ylabel('$x_{%d}$' % (i+1))
 
-ax[0].legend()
+ax[0].legend(loc='upper left')
 ax[-1].set_xlabel('time step')
 
 fig.savefig(fig_dir + 'nonlvl_state.png')
 
-
-plt.rcParams['figure.figsize'] = 20, 7
 fig, ax = plt.subplots(p, 1, sharex=True)
-
 ax[0].set_title('Comparison between nonlinear and linear perturbaton propagation')
 for i in range(p):
     quant1 = [y[i] for y in dy_nl]
     quant2 = [y[i] for y in dy]
     ax[i].plot(quant1, '-', color='dodgerblue', label=u'$\delta y_{nonlinear}$')
     ax[i].plot(quant2, '-', color='orangered', label=u'$\delta y_{linear}$')
+    ax[i].autoscale(enable=True, axis='x', tight=True)		
     ax[i].set_ylabel('$y_{%d}$' % (i+1))
-ax[0].legend()
+ax[0].legend(loc = 'upper left')
 ax[-1].set_xlabel('time step')
 
 plt.show()

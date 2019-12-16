@@ -81,7 +81,9 @@ class LKF(KF):
 
                 # Necessary to fill in blank spots in outpu
                 'x_full_kp1':x_nom_kp1 + dx_pre_kp1,
+                'x_nom_kp1': x_nom_kp1,
                 'y_kp1': none_meas,
+                'y_nom_kp1': none_meas,
                 'y_pre_est_kp1': none_meas,
                 'innov_cov': None,  # that will not work if it's none but Omega_k
             }
@@ -115,8 +117,10 @@ class LKF(KF):
 
             # Whatever the fuck else you want to output
             'x_full_kp1': x_nom_kp1 + dx_post_kp1,
+            'x_nom_kp1': x_nom_kp1,
             'y_kp1':y_kp1,
             'y_pre_est_kp1': y_nom_kp1 + dy_est_kp1,
+            'y_nom_kp1': y_nom_kp1,
             'innov_cov': innov_cov,
         }
 
