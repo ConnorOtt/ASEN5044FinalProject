@@ -32,3 +32,4 @@ dx_est_0 = dx_0
 
 
 data_dir = './Data/'
+fig_dir = './Report/Figures/'

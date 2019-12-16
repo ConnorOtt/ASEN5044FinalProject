@@ -111,12 +111,6 @@ for i in range(num_traj):
     all_NIS.append(nis_vec_i)
 
 
-lkf.plot_hist()
-
-# print(bounds_NEES)
-# print(bounds_NIS)
-
-
 # Average across the simulations
 avg_NEES = np.mean(np.array(all_NEES), 0)
 avg_NIS = np.mean(np.array(all_NIS), 0)
@@ -125,36 +119,24 @@ plt.rcParams['figure.figsize'] = 12, 6
 fig, ax = plt.subplots(2, 1, sharex=True)
 
 ax[0].set_title('NEES and NIS tests for LKF')
-ax[0].plot([nees for nees in np.array(all_NEES).T], '.', color='orangered', label='NEES Results')
-#ax[0].plot(np.array(state_resid_i).T[0], '.')
-#ax[0].plot(np.array(state_resid_i).T[1], '.')
-#ax[0].plot(np.array(state_resid_i).T[2], '.')
-#ax[0].plot(np.array(state_resid_i).T[3], '.')
+ax[0].plot(avg_NEES, '.', color='orangered', label='NEES Results')
 ax[0].axhline(bounds_NEES[0], linestyle='--', color='black')
-ax[0].axhline(bounds_NEES[1])#, linestyle='--', color='black')
-# ax[0].legend()
+ax[0].axhline(bounds_NEES[1], linestyle='--', color='black')
+ax[0].set_ylim([0, 10])
+ax[0].legend()
 
-
-#ax[1].plot([nis for nis in np.array(all_NIS).T], '.', color='dodgerblue', label='NIS Results')
 ax[1].plot(avg_NIS, '.', color='dodgerblue', label='NIS Results')
 ax[1].set_xlabel('time step k')
-ax[1].axhline(bounds_NIS[0])#, linestyle='--', color='black')
-ax[1].axhline(bounds_NIS[1])#, linestyle='--', color='black')
-# ax[1].legend()
+ax[1].axhline(bounds_NIS[0], linestyle='--', color='black')
+ax[1].axhline(bounds_NIS[1], linestyle='--', color='black')
+ax[1].set_ylim([0, 10])
+ax[1].legend()
 
-plt.show()
-
-
-
-# -------------------------- // Tune LKF // ---------------------------------
-
-
-
+fig.savefig(fig_dir + 'NEESNIS_lkf.png')
 
 
 
 # ------------- //  Perform NEES/NIS tests on EKF // ------------------------
-
 
 # Initialize system
 system = {
@@ -213,36 +195,19 @@ plt.rcParams['figure.figsize'] = 12, 6
 fig, ax = plt.subplots(2, 1, sharex=True)
 ax[0].set_title('NEES and NIS tests for EKF')
 ax[0].plot(NEES_avg, '.', color='orangered', label='NEES Results')
-ax[0].axhline(bounds_NEES[0])#, '--', color='black')
-ax[0].axhline(bounds_NEES[1])#, '--', color='black')
+ax[0].axhline(bounds_NEES[0], linestyle='--', color='black')
+ax[0].axhline(bounds_NEES[1], linestyle='--', color='black')
+ax[0].set_ylim([0, 10])
 ax[0].legend()
 
 ax[1].plot(NIS_avg, '.', color='dodgerblue', label='NIS Results')
-ax[1].axhline(bounds_NIS[0])#, '--', color='black')
-ax[1].axhline(bounds_NIS[1])#, '--', color='black')
+ax[1].axhline(bounds_NIS[0], linestyle='--', color='black')
+ax[1].axhline(bounds_NIS[1], linestyle='--', color='black')
 ax[1].set_xlabel('time step k')
+ax[1].set_ylim([0, 10])
 ax[1].legend()
 
+fig.savefig(fig_dir + 'NEESNIS_ekf.png')
+
 plt.show()
-
-
-# -------------------------- // Tune EKF // -----------------------------------
-# TODO
-
-
-
-
-
-# ------------- //  Verify that UKF works correctly // ------------------------
-# TODO
-
-
-
-
-
-# -------------------------- // Tune UKF // -----------------------------------
-# TODO
-
-
-
 
