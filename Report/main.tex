@@ -19,7 +19,7 @@
 
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% INTRODUCTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% INTRODUCTION  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section*{Introduction}
 In order to keep track of Earth-orbiting objects, a typical observation scheme includes ground stations which measure range and range-rate to a passing satellite. 
 These measurements, when combined with the known locations of the stations, allows for precises estimates of a satellites orbit state. 
@@ -127,7 +127,7 @@ For this study, we've chosen 95\% confidence bounds, which are denoted with the 
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{./Figures/NEESNIS_lkf.png}
+	\includegraphics[width=0.8\textwidth]{./Figures/NEESNIS_lkf_N10.png}
 	\caption{NEES and NIS chi-square results over time for N= \hl{N} simulated trajectories. Data points continue to grow past ~600 seconds into the analysis.}
 	\label{fig:neesnis_lkf}
 \end{figure}
@@ -148,7 +148,7 @@ The EKF, in contrast with the LKF, is much more capable of tracking the perturbe
 	\centering
 	\includegraphics[width=0.8\textwidth]{Figures/ekf_estimate_th.png}
 	\caption{EKF error estimate over the entire simulation period. }
-	\label{fig:neesnis_ekf}
+	\label{fig:ekf_est}
 \end{figure}
 
 
@@ -158,9 +158,9 @@ These results were generated using the same noisey trajectories and measurements
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{./Figures/NEESNIS_ekf.png}
+	\includegraphics[width=0.8\textwidth]{./Figures/NEESNIS_ekf_N10.png}
 	\caption{NEES and NIS chi-square results over time for N= \hl{N} simulated trajectories.}
-	\label{fig:ekf_est}
+	\label{fig:neesnis_ekf}
 \end{figure}
 
 These results show the estimate tracking the truth trajectory more accurately for the duration of the simulations. 
@@ -168,24 +168,23 @@ Becuase the EKF continuously updates its internal 'nominal' trajectory, it's abl
 This results in the filter's ability to keep up with the deviations from the original nominal trajectory, and estimate the truth trajectory accurately.
 
 
+\section{Testing Without Ground Truth}
+
+
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% CONCLUSION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
 
 
-
 \section{Advanced Questions}
-
 \subsection{Bugs}
 Crawling on our laptop screen \\
 underneath our keyboard's keys \\
-\texttt{clc, clear} and \texttt{close} \\
+\texttt{clear all, close all, clc} \\
 just end us now. Please, bugs, please. \\
  
 \subsection{The Unscented Kalman Filter}
-
-
-
-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% APPENDIX %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
