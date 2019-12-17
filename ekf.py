@@ -113,9 +113,6 @@ class EKF(KF):
         x_post_kp1 = x_pre_kp1 + K_kp1 @ nl_innov
         P_post_kp1 = (I - K_kp1 @ H_kp1) @ P_pre_kp1
 
-        # y_est_post_kp1 = self.h(x_post_kp1, id_list=id_list)
-
-        # NOTE: didn't put the time into calculating all of the other things
         out = {
             'x_pre_kp1': x_pre_kp1,
             'x_post_kp1': x_post_kp1,

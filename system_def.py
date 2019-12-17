@@ -6,7 +6,6 @@ to keep things more organized.
 
 """
 
-
 # Standard imports
 import sympy as sp
 import numpy as np
@@ -17,7 +16,6 @@ from scipy.stats import multivariate_normal as mvn
 
 # Local imports
 from constants import *
-
 
 # Symbolic variable definitions
 x1, x2, x3, x4 = sp.symbols('x1 x2 x3 x4')
@@ -30,7 +28,6 @@ x = sp.Matrix([[x1, x2, x3, x4]]).T  # spacecraft state
 s = sp.Matrix([xs, xdots, ys, ydots]).T  # station state
 u = sp.Matrix([[u1, u2]]).T  # control vector
 w = sp.Matrix([[w1, w2]]).T  # Noise vector
-
 
 """State Dynamcs"""
 # Create f(x) = xdot
@@ -158,9 +155,7 @@ def H_k_eval(x_nom_k, t_k, id_list=None):
 		id_list		<list>			List of station ids
 	
 	"""
-	if type(x_nom_k) is not np.ndarray:  # for the odd accidental list input
-		x_nom_k = np.array(x_k).reshape((-1, ))
-
+	x_nom_k = np.array(x_nom_k).reshape((-1, ))
 	sites, _ = get_vis_sites(x_nom_k, t_k, id_list=id_list)
 
 	if len(sites) != 0:
