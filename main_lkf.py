@@ -21,6 +21,7 @@ from scipy.stats.distributions import chi2
 import matplotlib.pyplot as plt
 import pickle
 from copy import copy
+from pprint import pprint
 
 # Import kalman filter classes
 from lkf import LKF
@@ -181,8 +182,26 @@ ax[-1].set_xlabel('time step')
 fig.savefig(fig_dir + 'noisey_truth.png')
 
 
+
+
 fig, ax = plt.subplots(p, 1, sharex=True)
 ax[0].set_title('Typical Noisey Measurements')
+
+
+# Not really sure what I want to do with this but it seemed like
+# a good idea like 10 minutes ago
+meas_by_station = {k:[] for k in range(1, 13)}
+for y in truth_meas_i:
+    for k in meas_by_station:
+        # Give the station None by default
+        meas_by_station[k].append([None for _ in range(p)])
+
+        # Go through station ids in y and replace those in meas_by_station if they match
+        for i in range(len(y['stationID'])):
+            if y['stationID'][i] == k:
+                meas_by_station[k][-1] = y['meas'][p*i:p*i+p]           
+
+
 for i in range(p):
     quant1 = [y['meas'][i] for y in truth_meas_i]
     quant2 = [y[i] for y in report['y_nom_kp1']]

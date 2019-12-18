@@ -33,24 +33,81 @@ In this report, we explore the performance of the LKF and EKF on nonlinear syste
 In developing these algorithms, we assume the process and measurement noise are unknown.
 We then iterate on different process noise and measurement noise covariance matrices and evaluate the algorithms using \_\_\_\_ (NEES) and \_\_\_\_ (NIS) tests until suitable values for uncertainty are found. 
 
-\section{Part I. Basic System Analysis}
+\section{Basic System Analysis}
+To study the LKF and EKF, we establish an estimation problem in the context of orbut determination. 
+The following section describes the continuous-time system used in this study for dynamics and measurements.
+The state of an orbitting object is described by its position and velocity in a 2D plane with the vector $x = [X, \dot{X}, Y, \dot{Y}]^T = [x_1, x_2, x_3, x_4]$.
+
+The full CT, non-linear equations of motion for this system are shown below:
+
+
+Equations of motion:
+$$
+f(x) = \dot{x} = 
+\left[\begin{matrix}
+x_2 \\
+-\frac{\mu x_1}{(x_1^2 + x_3^2)^{3/2}} + u_1 + \tilde{w}_1 \\
+x_4 \\
+-\frac{\mu x_3}{(x_1^2 + x_3^2)^{3/2}} + u_2 + \tilde{w}_2
+\end{matrix}\right]
+$$
+\indent Measurement function:
+$$
+h(x) = y = 
+\left[\begin{matrix}
+\sqrt{(x_1 - x^{(i)}_s)^2 + (x_3 - y^{(i)}_s)^2}\\
+\frac{\left[x_1 - x^{(i)}_s\right]\left[x_2 - \dot{x}^{(i)}_s\right] + \left[x_3 - y^{(i)}_s\right]\left[x_4 - \dot{y}^{(i)}_s\right]}{h_1} \\
+\tan^{-1}\big(\frac{x_3 - y^{(i)}_s}{x_1 - x^{(i)}_s} \big)\\
+\end{matrix}\right]
+$$
+
+in the equation $h(x) = y$, terms a superscript (i) denotes the position or velocity of one of 12 ground stations currently veiwing the spacecraft. 
+These stations' position and velocity is assumed to be known completely.
 
 \subsection{CT Model Jacobians}
 
-$\tilde{A}$
-$$\left[\begin{matrix}0 & 1 & 0 & 0\\\frac{3\mu x_{1}^{2}}{\left(x_{1}^{2} + x_{3}^{2}\right)^{2.5}} - \frac{\mu}{\left(x_{1}^{2} + x_{3}^{2}\right)^{1.5}} & 0 & \frac{3\mu x_{1} x_{3}}{\left(x_{1}^{2} + x_{3}^{2}\right)^{2.5}} & 0\\0 & 0 & 0 & 1\\\frac{3\mu x_{1} x_{3}}{\left(x_{1}^{2} + x_{3}^{2}\right)^{2.5}} & 0 & \frac{3\mu x_{3}^{2}}{\left(x_{1}^{2} + x_{3}^{2}\right)^{2.5}} - \frac{\mu}{\left(x_{1}^{2} + x_{3}^{2}\right)^{1.5}} & 0\end{matrix}\right]$$
+$$
+\tilde{A} = \frac{\partial f}{\partial x} \biggr\rvert_{nom} = 
+\left[\begin{matrix}0 & 1 & 0 & 0\\\frac{3\mu x_{1}^{2}}{\left(x_{1}^{2} + x_{3}^{2}\right)^{5/2}} - \frac{\mu}{\left(x_{1}^{2} + x_{3}^{2}\right)^{3/2}} & 0 & \frac{3\mu x_{1} x_{3}}{\left(x_{1}^{2} + x_{3}^{2}\right)^{5/2}} & 0\\0 & 0 & 0 & 1\\\frac{3\mu x_{1} x_{3}}{\left(x_{1}^{2} + x_{3}^{2}\right)^{5/2}} & 0 & \frac{3\mu x_{3}^{2}}{\left(x_{1}^{2} + x_{3}^{2}\right)^{5/2}} - \frac{\mu}{\left(x_{1}^{2} + x_{3}^{2}\right)^{3/2}} & 0\end{matrix}\right]
+$$
 
-$\tilde{B}$
-$$\left[\begin{matrix}0.0 & 0.0\\1.0 & 0.0\\0.0 & 0.0\\0.0 & 1.0\end{matrix}\right]$$
+$$
+\tilde{B} = \frac{\partial f}{\partial u} \biggr\rvert_{nom} = 
+\left[\begin{matrix}0 & 0\\1 & 0\\0 & 0\\0 & 1\end{matrix}\right]
+$$
 
-$\tilde{\Gamma}$
-$$\left[\begin{matrix}0.0 & 0.0\\1.0 & 0.0\\0.0 & 0.0\\0.0 & 1.0\end{matrix}\right]$$
+$$
+\tilde{\Gamma} = \frac{\partial f}{\partial w} \biggr\rvert_{nom} = 
+\left[\begin{matrix}0 & 0\\1 & 0\\0 & 0\\0 & 1\end{matrix}\right]
+$$
 
-$\tilde{H}$ - Hmmm
-$$\left[\begin{matrix}\frac{x_{1} - x_s}{\left(\left(x_{1} - x_s\right)^{2} + \left(x_{3} - y_s\right)^{2}\right)^{0.5}} & 0 & \frac{x_{3} - y_s}{\left(\left(x_{1} - x_s\right)^{2} + \left(x_{3} - y_s\right)^{2}\right)^{0.5}} & 0\\\frac{\left(- x_{1} + x_s\right) \left(\left(x_{1} - x_s\right) \left(x_{2} - \dot{x}_s\right) + \left(x_{3} - y_s\right) \left(x_{4} - \dot{y}_s\right)\right)}{\left(\left(x_{1} - x_s\right)^{2} + \left(x_{3} - y_s\right)^{2}\right)^{1.5}} + \frac{x_{2} - \dot{x}_s}{\left(\left(x_{1} - x_s\right)^{2} + \left(x_{3} - y_s\right)^{2}\right)^{0.5}} & \frac{x_{1} - x_s}{\left(\left(x_{1} - x_s\right)^{2} + \left(x_{3} - y_s\right)^{2}\right)^{0.5}} & \frac{\left(- x_{3} + y_s\right) \left(\left(x_{1} - x_s\right) \left(x_{2} - \dot{x}_s\right) + \left(x_{3} - y_s\right) \left(x_{4} - \dot{y}_s\right)\right)}{\left(\left(x_{1} - x_s\right)^{2} + \left(x_{3} - y_s\right)^{2}\right)^{1.5}} + \frac{x_{4} - \dot{y}_s}{\left(\left(x_{1} - x_s\right)^{2} + \left(x_{3} - y_s\right)^{2}\right)^{0.5}} & \frac{x_{3} - y_s}{\left(\left(x_{1} - x_s\right)^{2} + \left(x_{3} - y_s\right)^{2}\right)^{0.5}}\\\frac{- x_{3} + y_s}{\left(x_{1} - x_s\right)^{2} + \left(x_{3} - y_s\right)^{2}} & 0 & \frac{x_{1} - x_s}{\left(x_{1} - x_s\right)^{2} + \left(x_{3} - y_s\right)^{2}} & 0\end{matrix}\right]$$ 	
+$$
+\tilde{H} = \frac{\partial h}{\partial x} \biggr\rvert_{nom} = 
+\left[\begin{matrix}
+\tilde{H}_{11} & \tilde{H}_{12} & \tilde{H}_{13} &  \tilde{H}_{14}\\
+\tilde{H}_{21} & \tilde{H}_{22} & \tilde{H}_{23} &  \tilde{H}_{24}\\
+\tilde{H}_{31} & \tilde{H}_{32} & \tilde{H}_{33} &  \tilde{H}_{34}
+\end{matrix}\right]
+$$
 
+Where: 
+\begin{align*}
+\tilde{H}_{11} &= \frac{x_{1} - x_s}{\left(\left(x_{1} - x_s\right)^{2} + \left(x_{3} - y_s\right)^{2}\right)^{1/2}} \\
+\tilde{H}_{12} &= 0 \\
+\tilde{H}_{13} &= \frac{x_{3} - y_s}{\left(\left(x_{1} - x_s\right)^{2} + \left(x_{3} - y_s\right)^{2}\right)^{1/2}} \\
+\tilde{H}_{14} &= 0 \\
+\tilde{H}_{21} &= \frac{\left(x_s - x_{1}\right) \left(\left(x_{1} - x_s\right) \left(x_{2} - \dot{x}_s\right) + \left(x_{3} - y_s\right) \left(x_{4} - \dot{y}_s\right)\right)}{\left(\left(x_{1} - x_s\right)^{2} + \left(x_{3} - y_s\right)^{2}\right)^{3/2}} + \frac{x_{2} - \dot{x}_s}{\left(\left(x_{1} - x_s\right)^{2} + \left(x_{3} - y_s\right)^{2}\right)^{1/2}} \\
+\tilde{H}_{22} &= \frac{x_{1} - x_s}{\left(\left(x_{1} - x_s\right)^{2} + \left(x_{3} - y_s\right)^{2}\right)^{1/2}} \\
+\tilde{H}_{23} &= \frac{\left(- x_{3} + y_s\right) \left(\left(x_{1} - x_s\right) \left(x_{2} - \dot{x}_s\right) + \left(x_{3} - y_s\right) \left(x_{4} - \dot{y}_s\right)\right)}{\left(\left(x_{1} - x_s\right)^{2} + \left(x_{3} - y_s\right)^{2}\right)^{3/2}} + \frac{x_{4} - \dot{y}_s}{\left(\left(x_{1} - x_s\right)^{2} + \left(x_{3} - y_s\right)^{2}\right)^{1/2}} \\
+\tilde{H}_{24} &= \frac{x_{3} - y_s}{\left(\left(x_{1} - x_s\right)^{2} + \left(x_{3} - y_s\right)^{2}\right)^{1/2}}\\
+\tilde{H}_{31} &= \frac{y_s - x_{3}}{\left(x_{1} - x_s\right)^{2} + \left(x_{3} - y_s\right)^{2}} \\
+\tilde{H}_{32} &= 0 \\
+\tilde{H}_{33} &= \frac{x_{1} - x_s}{\left(x_{1} - x_s\right)^{2} + \left(x_{3} - y_s\right)^{2}} \\
+\tilde{H}_{34} &= 0 \\
+\end{align*}
 
 \subsection{DT Linearized Model Matrices}
+
 
 \subsection{Simulated Nonlinear vs. Linearized System}
 Figure \ref{fig:nlvl_s} shows the difference between propagating a small initial perturbation using full nonlinear dynamics and the above DT state transition matrices. 
@@ -70,6 +127,7 @@ This indicates that the linearized dynamics are only appropriate for short time 
 
 We draw similar conclusions about the validity of the linearized measurement function from Figure \ref{fig:nlvl_m}.
 As the perturbed orbit drifts further and further from the nominal orbit, the linearized dynamics and measurement function are unable to closely match the nonlinear dynamics. 
+ 
 
 \begin{figure}[H]
 	\centering
@@ -80,11 +138,23 @@ As the perturbed orbit drifts further and further from the nominal orbit, the li
 
 
 \section{Nonlinear Filtering}
+This section delves into the capabilities of the LKF and EKF in with respect to estimating nonlinear trajectories. 
+We explore this through simulated orbits wherein truth states are generated with a deviation from the nominal initial conditions, and process noise (AWGN) included in the dynamics of the system. 
+The AWGN is added to the accelerations via a Zero Order Hold over each discrete time step in the integrator as the trajectory is calculated. 
+The noisey, perturbed truth states are mapped to measurement space through the nonlinear measurement equation and measurement noise is added on to it.
+Process and measurement noise are both sampled from $Q_{true}$ and $R_{true}$ given in the assignment data when generating truth trajectories.
+
+Each truth trajectory is initiall perturbed with the same $\delta x_0$ sampled from a chosen $P_0$. These are $P_0$ = diag([$10m^2, 1m^2/s^2, 10m^2, 1m^2/s^2$]) and $\delta x_0$ = [0.078 km, 0.022 km/s, -0.058 km, 0.031 km/s].
+All filters begin with this initial estimate either as a deviation of full state, and all begin with this initial covariance. 
+
 
 \subsection{The Linearized Kalman Filter}
 The LKF revolves around the concept of linearizing dynamics and measurement functions around a nominal trajectory at discrete time steps in the filter. 
 This has its benefits in terms of simplicity and computational load, but suffers in terms of accuracy with relatively large deviations from the nominal trajectory. 
-Figures \ref{fig:noisey_states} and \ref{fig:noisey_meas} show a typical noisey truth trajectory and accompanying noisey measurements as compared to the nominal, noiseless trajectory and measurements.  
+Figures \ref{fig:noisey_states} and \ref{fig:noisey_meas} show a typical noisey truth trajectory and accompanying noisey measurements as compared to the nominal, noiseless trajectory and measurements. 
+We note here that the noise is largely drowned out by the effect of the initial perturbation. 
+For Figure \ref{fig:noisey_meas}, both sets of measurements are generated as if they can see the same stations at each time step. 
+Near the start of the simulation, this is mostly true, but the two trajectories quickly move apart and the difference in measurements becomes more jarring.
 
 \begin{figure}[H]
 	\centering
@@ -103,6 +173,7 @@ Figures \ref{fig:noisey_states} and \ref{fig:noisey_meas} show a typical noisey 
 Figure \ref{fig:lkf_est_zoom} shows the LKF estimate error and uncertainty bounds for the first 100 time steps (1e4 seconds) of the simulation. 
 The filter performs adequately for these first 100 time steps.
 However, as time goes on, and the truth trajectory deviates further from the nominal, the LKF is unable to estimate an accurate trajectory. 
+\subsubsection{Typical Performance}
 Figure \ref{fig:lkf_est} shows the rapidly deriorating estimate error in the LKF.  
 
 \begin{figure}[H]
@@ -121,17 +192,16 @@ Figure \ref{fig:lkf_est} shows the rapidly deriorating estimate error in the LKF
 
 \subsubsection{NEES and NIS Tests}
 The following are results of NEES and NIS chi-square tests for an implementation of the LKF. 
-\hl{list specs of the sim here when the final figures go in.} 
 In the following figures, we plot NEES and NIS values from the filter at time k, averaged over N simulated trajectories. 
 At each time step, the NEES and NIS values are expected to fall into 4 (NEES) or 3 (NIS) degree of freedom $\mathcal{X}^2$ distributions. 
 As such, we expect values to fall within some range of the expecation of these distributions. 
 For this study, we've chosen 95\% confidence bounds, which are denoted with the dotted black lines. 
-\hl{The filter was tuned by adjusting the filter's knowledge of process noise in the system until the simulations reliable generated NEES and NIS results in }
+\hl{The filter was tuned by adjusting the filter's knowledge of process noise in the system until the simulations reliably generated NEES and NIS results in}
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.8\textwidth]{Figures/{NEESNIS_lkf_N10Q1.0E-09}.png}
-	\caption{NEES and NIS chi-square results over time for N= \hl{N} simulated trajectories. Data points continue to grow past ~600 seconds into the analysis.}
+	\caption{NEES and NIS chi-square results over time for N= \hl{N} simulated trajectories. Data points continue to grow past 200 seconds into the analysis.}
 	\label{fig:neesnis_lkf}
 \end{figure}
 
@@ -144,6 +214,8 @@ The EKF relies less on linearizations about an initial nominal trajectory.
 Instead of linearly propagating a deviation in a state, the EKF uses full nonlinear dynamics to propagate its full current state estimate. 
 It then linearizes about its current estimate, rather than the initial nominal trajectory to perform time and measurement updates to the covariance.   
 This allows the EKF to adjust for small perturbations from the nominal that may grow into large devations with time, as it does not use the nominal trajectory for linearization. 
+
+\subsubsection{Typical Performance}
 Figure \ref{fig:ekf_est} shows a time history of a typical EKF estimate. 
 The EKF, in contrast with the LKF, is much more capable of tracking the perturbed trajectory.  
 

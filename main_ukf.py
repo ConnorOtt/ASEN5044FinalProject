@@ -55,7 +55,7 @@ num_traj = len(truth_trajectories)
 
 print(dx_est_0)
 matprint(P_0)
-# exit(0)
+exit(0)
 
 #--------// run UKF with given dataset //---------------------
 # Initialize system
