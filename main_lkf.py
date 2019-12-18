@@ -8,7 +8,7 @@ This main script performs the following:
 
 Authors:        Keith Covington, Connor Ott
 Created:        09 Dec 2019
-Last Modified:  11 Dec 2019
+Last Modified:  18 Dec 2019
 
 """
 
@@ -30,6 +30,7 @@ from system_def import dt_jac_eval_funcs, ct_nl_funcs
 
 plt.rcParams['font.size'] = 20
 plt.rcParams['figure.figsize'] = 16, 10
+#plt.rc('text', usetex=True)
 # -----------------------// Set up system //-----------------------------------
 
 
@@ -48,13 +49,14 @@ truth_measurements = pickle.load(pickle_in)
 
 
 # ---------// run the LKF with the data provided //--------------
+#Q = np.eye(2) * 1e-9
 Q = np.eye(2) * 1e-9
 system = {
     # Required by KF algo
     "t_0": t_0, 
     "x_0": dx_est_0,
     "P_0": P_0,
-    "Q": Qtrue, 
+    "Q": Q, 
     "R": Rtrue, 
     **dt_jac_eval_funcs, 
     **ct_nl_funcs,
@@ -73,7 +75,7 @@ while len(ycp) > 0:
 report = lkf.report_hist(['x_full_kp1', 'P_post_kp1'])
 
 fig, ax = plt.subplots(n, 1, sharex=True)
-ax[0].set_title('State Errors and 2$\sigma$ Bounds - LKF')
+ax[0].set_title('State Estimate and 2$\sigma$ Bounds - LKF')
 for i in range(n):
     state_quant1 = [x[i] for x in report['x_full_kp1']]
     state_quant2 = [x[i] + 2*np.sqrt(P[i, i]) for x, P in zip(report['x_full_kp1'], report['P_post_kp1'])]
@@ -152,7 +154,8 @@ ax[0].plot(avg_NEES, '.', color='orangered', label='NEES Results')
 ax[0].axhline(bounds_NEES[0], linestyle='--', color='black')
 ax[0].axhline(bounds_NEES[1], linestyle='--', color='black')
 ax[0].set_ylim([0, 10])
-ax[0].autoscale(enable=True, axis='x', tight=True)
+ax[0].set_xlim([0, 150])
+#ax[0].autoscale(enable=True, axis='x', tight=True)
 ax[0].legend()
 
 ax[1].plot(avg_NIS, '.', color='dodgerblue', label='NIS Results')
@@ -160,9 +163,11 @@ ax[1].set_xlabel('time step k')
 ax[1].axhline(bounds_NIS[0], linestyle='--', color='black')
 ax[1].axhline(bounds_NIS[1], linestyle='--', color='black')
 ax[1].set_ylim([0, 10])
-ax[1].autoscale(enable=True, axis='x', tight=True)
+ax[1].set_xlim([0, 150])
+#ax[1].autoscale(enable=True, axis='x', tight=True)
 ax[1].legend()
 
+#fig.savefig(fig_dir + 'NEESNIS_lkf_N' + str(num_traj) + 'Q{:.1E}.png'.format(Q[0, 0]))
 fig.savefig(fig_dir + 'NEESNIS_lkf_N' + str(num_traj) + 'Q{:.1E}.png'.format(Q[0, 0]))
 
 

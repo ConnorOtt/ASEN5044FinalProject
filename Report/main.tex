@@ -2,6 +2,7 @@
 \usepackage[margin=1.1in]{geometry}	% edit margins
 \usepackage{amsmath}			% for math symbols
 \usepackage{graphicx}			% including figures
+\usepackage{grffile}			% for weird filenames with more dots
 \usepackage{float}			% placing figures at specific location
 \usepackage{amssymb}			% math symbols
 \usepackage{color, soul}			% for highlighting
@@ -34,6 +35,7 @@ In developing these algorithms, we assume the process and measurement noise are 
 We then iterate on different process noise and measurement noise covariance matrices and evaluate the algorithms using \_\_\_\_ (NEES) and \_\_\_\_ (NIS) tests until suitable values for uncertainty are found. 
 
 \section{Part I. Basic System Analysis}
+\label{sec: Part I}
 
 \subsection{CT Model Jacobians}
 
@@ -63,7 +65,7 @@ This indicates that the linearized dynamics are only appropriate for short time 
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{./Figures/nonlvl_state.png}
+	\includegraphics[width=\textwidth]{./Figures/nonlvl_state.png}
 	\caption{Comparision between nonlinear and linear perturbation propagation.}
 	\label{fig:nlvl_s}
 \end{figure}
@@ -73,7 +75,7 @@ As the perturbed orbit drifts further and further from the nominal orbit, the li
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{./Figures/nonlvl_meas.png}
+	\includegraphics[width=\textwidth]{./Figures/nonlvl_meas.png}
 	\caption{Comparision between nonlinear and linear perturbation propagation.}
 	\label{fig:nlvl_m}
 \end{figure}
@@ -82,6 +84,7 @@ As the perturbed orbit drifts further and further from the nominal orbit, the li
 \section{Nonlinear Filtering}
 
 \subsection{The Linearized Kalman Filter}
+\label{sec: LKF}
 The LKF revolves around the concept of linearizing dynamics and measurement functions around a nominal trajectory at discrete time steps in the filter. 
 This has its benefits in terms of simplicity and computational load, but suffers in terms of accuracy with relatively large deviations from the nominal trajectory. 
 Figures \ref{fig:noisey_states} and \ref{fig:noisey_meas} show a typical noisey truth trajectory and accompanying noisey measurements as compared to the nominal, noiseless trajectory and measurements.  
@@ -122,24 +125,57 @@ Figure \ref{fig:lkf_est} shows the rapidly deriorating estimate error in the LKF
 \subsubsection{NEES and NIS Tests}
 The following are results of NEES and NIS chi-square tests for an implementation of the LKF. 
 \hl{list specs of the sim here when the final figures go in.} 
+
 In the following figures, we plot NEES and NIS values from the filter at time k, averaged over N simulated trajectories. 
 At each time step, the NEES and NIS values are expected to fall into 4 (NEES) or 3 (NIS) degree of freedom $\mathcal{X}^2$ distributions. 
 As such, we expect values to fall within some range of the expecation of these distributions. 
 For this study, we've chosen 95\% confidence bounds, which are denoted with the dotted black lines. 
-\hl{The filter was tuned by adjusting the filter's knowledge of process noise in the system until the simulations reliable generated NEES and NIS results in }
+The filter was tuned by adjusting the filter's knowledge of process noise in the system until the simulations reliably generated NEES and NIS results within the confidence bounds at least 95\% of the time. 
+Note that in the NEES/NIS test below, only a time span of $k\ \epsilon\ [0, 150]$ is shown due to the LKF's poor performance further into the orbit. 
+
+In this first iteration of the tuning process, the Kalman filter was initialized with an internal (guessed) process noise of $Q_{KF} = 10^{-6} \cdot I_{2 x 2}$. 
+The results of this test can be seen in Figure \ref{fig:neesnis_lkf_Qbig}. 
+In both tests---but especially the NEES---the values are biased below the lower confidence bound. 
+This low bias lead to the conclusion that the guessed $Q_{KF}$ is too large, and can be lowered for better filter performance. 
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{Figures/NEESNIS_lkf_N10Q1.0E-06.png}
+	\caption{NEES and NIS chi-square results over time for N = 10 simulated trajectories. Guessed $Q_{KF} = 10^{-6} \cdot I_{2 x 2}$.}
+	\label{fig:neesnis_lkf_Qbig}
+\end{figure}
+
+In the second iteration of the tuning process, the Kalman filter was initialized with an internal process noise of $Q_{KF} = 10^{-12} \cdot I_{2 x 2}$. 
+The results of this test can be seen in Figure \ref{fig:neesnis_lkf_Qsmall}. 
+In both tests---but especially the NEES---the values are biased above the upper confidence bound. 
+This low bias lead to the conclusion that the guessed $Q_{KF}$ is too too small, and should be increased for as to avoid being smug. 
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{Figures/NEESNIS_lkf_N10Q1.0E-12.png}
+	\caption{NEES and NIS chi-square results over time for N = 10 simulated trajectories. Guessed $Q_{KF} = 10^{-12} \cdot I_{2 x 2}$.}
+	\label{fig:neesnis_lkf_Qsmall}
+\end{figure}
+
+In this third and final iteration of the tuning process, the Kalman filter was initialized with an internal process noise of $Q_{KF} = 10^{-9} \cdot I_{2 x 2}$. 
+The results of this test can be seen in Figure \ref{fig:neesnis_lkf}.
+While neither is perfect (due to the inherent ineptness of the LKF to this orbit determination problem), the $Q_{KF}$ used here seems to be the best choice. 
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{Figures/{NEESNIS_lkf_N10Q1.0E-09}.png}
-	\caption{NEES and NIS chi-square results over time for N= \hl{N} simulated trajectories. Data points continue to grow past ~600 seconds into the analysis.}
+	\includegraphics[width=\textwidth]{Figures/NEESNIS_lkf_N10Q1.0E-09.png}
+	\caption{NEES and NIS chi-square results over time for N = 10 simulated trajectories. Guessed $Q_{KF} = 10^{-9} \cdot I_{2 x 2}$.}
 	\label{fig:neesnis_lkf}
 \end{figure}
 
-The findings in Section I indicated that the linearized dynamics used in the LFK become invalid as small initial perturbations eventually cause large deviations from the nominal trajectory. 
-Figure \ref{fig:neesnis_lkf} corroborates these findings, and solidifies our understanding of where the LKF is most capable, for small perturbations near the nominal trajectory.  
+\subsubsection{LKF Tuning Conclusions}
+It should be noted that this process outlined above can be an automated process that begins by hopping between very large and very small guesses of $Q_{KF}$ and narrowing in until the ``best" performance is achieved. 
+The specific definition of ``best" performance may be defined by the user of the program who is performing the tuning and does not necessarily represent an absolute optimization. 
+
+The findings in Section \ref{sec: Part I} indicated that the linearized dynamics used in the LFK become invalid as small initial perturbations eventually cause large deviations from the nominal trajectory. 
+Figures \ref{fig:neesnis_lkf_Qbig} - \ref{fig:neesnis_lkf} corroborate these findings, and solidify our understanding of where the LKF is most capable, for small perturbations near the nominal trajectory.  
 
 
 \subsection{The Extended Kalman Filter}
+\label{sec: EKF}
 The EKF relies less on linearizations about an initial nominal trajectory.
 Instead of linearly propagating a deviation in a state, the EKF uses full nonlinear dynamics to propagate its full current state estimate. 
 It then linearizes about its current estimate, rather than the initial nominal trajectory to perform time and measurement updates to the covariance.   
@@ -149,7 +185,7 @@ The EKF, in contrast with the LKF, is much more capable of tracking the perturbe
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{Figures/ekf_estimate_th.png}
+	\includegraphics[width=\textwidth]{Figures/ekf_estimate_th.png}
 	\caption{Typical EKF error estimate over the entire simulation period. }
 	\label{fig:ekf_est}
 \end{figure}
@@ -161,7 +197,7 @@ These results were generated using the same noisey trajectories and measurements
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{./Figures/{NEESNIS_ekf_N10Q1.0E-09}.png}
+	\includegraphics[width=\textwidth]{./Figures/NEESNIS_ekf_N10Q1.0E-09.png}
 	\caption{NEES and NIS chi-square results over time for N= \hl{N} simulated trajectories.}
 	\label{fig:neesnis_ekf}
 \end{figure}
@@ -178,14 +214,14 @@ The results of these  are shown below for the LKF and EKF respectively using the
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{Figures/lkf_dataste_est.png}
+	\includegraphics[width=\textwidth]{Figures/lkf_dataste_est.png}
 	\caption{LKF results using assigment dataset.}
 	\label{fig:lkf_dataset}
 \end{figure}
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{Figures/ekf_dataset_est.png}
+	\includegraphics[width=\textwidth]{Figures/ekf_dataset_est.png}
 	\caption{EKF results using assigment dataset.}
 	\label{fig:ekf_dataset}
 \end{figure}
@@ -210,21 +246,21 @@ The results of an implementation the UKf on the data set used for previous tests
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{Figures/ukf_dataset_est.png}
+	\includegraphics[width=\textwidth]{Figures/ukf_dataset_est.png}
 	\caption{UKF results using assigment dataset.}
 	\label{fig:ukf_dataset}
 \end{figure}
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{Figures/ukf_estimate_th.png}
+	\includegraphics[width=\textwidth]{Figures/ukf_estimate_th.png}
 	\caption{Typical UKF error estimate over the entire simulation period.}
 	\label{fig:ukf_est}
 \end{figure}
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{./Figures/{NEESNIS_ukf_N10Q1.0E-09}.png}
+	\includegraphics[width=\textwidth]{./Figures/NEESNIS_ukf_N10Q1.0E-09.png}
 	\caption{NEES and NIS chi-square results over time for N= \hl{N} simulated trajectories.}
 	\label{fig:neesnis_ukf}
 \end{figure}
