@@ -198,11 +198,26 @@ Figure \ref{fig:lkf_est} shows the rapidly deriorating estimate error in the LKF
 \subsubsection{NEES and NIS Tests}
 The following are results of NEES and NIS chi-square tests for an implementation of the LKF. 
 In the following figures, we plot NEES and NIS values from the filter at time k, averaged over N simulated trajectories. 
+The equations for a given NEES and NIS equations at a time $k$ is given by Equations \ref{eq:NEES} and \ref{eq:NIS}, respectively.
+\begin{equation}
+	\epsilon_{x,k} = e^T_{x,k} (P^+_k)^{-1} e_{x,k},
+	\quad \text{where} \quad
+	e_{x,k} = x_k - \hat{x}^+_k
+	\label{eq:NEES}
+\end{equation}
+\begin{equation}
+	\epsilon_{y,k} = e^T_{y,k} (S_k)^{-1} e_{y,k},
+	\quad \text{where} \quad
+	e_{y,k} = y_k - \hat{y}^+_k
+	\label{eq:NIS}
+\end{equation}
 At each time step, the NEES and NIS values are expected to fall into 4 (NEES) or 3 (NIS) degree of freedom $\mathcal{X}^2$ distributions. 
 As such, we expect values to fall within some range of the expecation of these distributions. 
 For this study, we've chosen 95\% confidence bounds, which are denoted with the dotted black lines. 
+
 The filter was tuned by adjusting the filter's knowledge of process noise in the system until the simulations reliably generated NEES and NIS results within the confidence bounds at least 95\% of the time. 
 Note that in the NEES/NIS test below, only a time span of $k\ \epsilon\ [0, 150]$ is shown due to the LKF's poor performance further into the orbit. 
+Additionally, note that $N$ was chosen to be 10 for the purpose of minimizing computational time, while still conveying the information gathered from these tests. 
 
 In this first iteration of the tuning process, the Kalman filter was initialized with an internal (guessed) process noise of $Q_{KF} = 10^{-6} \cdot I_{2 x 2}$. 
 The results of this test can be seen in Figure \ref{fig:neesnis_lkf_Qbig}. 
@@ -240,9 +255,10 @@ While neither is perfect (due to the inherent ineptness of the LKF to this orbit
 \subsubsection{LKF Tuning Conclusions}
 It should be noted that this process outlined above can be an automated process that begins by hopping between very large and very small guesses of $Q_{KF}$ and narrowing in until the ``best" performance is achieved. 
 The specific definition of ``best" performance may be defined by the user of the program who is performing the tuning and does not necessarily represent an absolute optimization. 
+However, since the LKF was shown to perform poorly for this orbit determination problem given this mild initial perturbation, much human intervention was required to assert the reliability of the results. 
 
-The findings in Section \ref{sec: Part I} indicated that the linearized dynamics used in the LFK become invalid as small initial perturbations eventually cause large deviations from the nominal trajectory. 
-Figures \ref{fig:neesnis_lkf_Qbig} - \ref{fig:neesnis_lkf} corroborate these findings, and solidify our understanding of where the LKF is most capable, for small perturbations near the nominal trajectory.  
+Overall, as the findings findings in Section \ref{sec: Part I} indicated, the linearized dynamics used in the LFK become invalid as small initial perturbations eventually cause large deviations from the nominal trajectory. 
+Figures \ref{fig:neesnis_lkf_Qbig} - \ref{fig:neesnis_lkf} corroborate these findings, and solidify our understanding of where the LKF is most capable: for small perturbations near the nominal trajectory.  
 
 
 \subsection{The Extended Kalman Filter}
@@ -265,13 +281,37 @@ The EKF, in contrast with the LKF, is much more capable of tracking the perturbe
 
 
 \subsubsection{NEES and NIS Tests}
-Figure \ref{fig:neesnis_ekf} shows the NEES and NIS results for the EKF.
-These results were generated using the same noisey trajectories and measurements as used for the LKF. 
+Similar to before with the LKF, the EKF can be tuned by finding a $Q_{KF}$ that accurately models the actual process noise in the system. 
+This is again done by starting with initial high and low magnitudes of $Q_{KF}$ and narrowing in based on the apparent bias n the NEES and NIS values. 
+Note that, for all of the following tuning EKF operations, the results were generated using the same noisey trajectories and measurements as used before for the LKF. 
 
+Figure \ref{fig:neesnis_ekf_Qbig} shows NEES and NIS results for the EKF when guessing a processes noise of $Q_{KF} = 10^{-6} \cdot I_{2 x 2}$. 
+Note that it is apparent from this test that the guessed $Q_{KF}$ here is too big since the NEES and NIS values are both biased low in the confidence intervals. 
+The filter in this case can be seen to be pessimistic, as it does not trust its estimate. 
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{./Figures/NEESNIS_ekf_N10Q1.0E-06.png}
+	\caption{NEES and NIS chi-square results over time for N = 10 simulated trajectories and $Q_{KF} = 10^{-6} \cdot I_{2 x 2}$.}
+	\label{fig:neesnis_ekf_Qbig}
+\end{figure}
+
+
+Decreasing the guessed process noise to $Q_{KF}= 10^{-12} \cdot I_{2 x 2}$ yields the results seen in Figure \ref{fig:neesnis_ekf_Qsmall} in which the filter is smug. 
+It is seen here trusting its estimate too much, and latching on to a trajectory that is not the truth data. 
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{./Figures/NEESNIS_ekf_N10Q1.0E-12.png}
+	\caption{NEES and NIS chi-square results over time for N = 10 simulated trajectories and $Q_{KF} = 10^{-12} \cdot I_{2 x 2}$.}
+	\label{fig:neesnis_ekf_Qsmall}
+\end{figure}
+
+
+Here in Figure \ref{fig:neesnis_ekf}, the NEES and NIS results for the EKF are right spot on in terms of number of NEES and NIS values lying within the confidence bounds. 
+This demonstrates a well-tuned filter. 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=\textwidth]{./Figures/NEESNIS_ekf_N10Q1.0E-09.png}
-	\caption{NEES and NIS chi-square results over time for N= \hl{N} simulated trajectories.}
+	\caption{NEES and NIS chi-square results over time for N = 10 simulated trajectories and $Q_{KF} = 10^{-9} \cdot I_{2 x 2}$.}
 	\label{fig:neesnis_ekf}
 \end{figure}
 
@@ -344,8 +384,12 @@ The results of an implementation the UKf on the data set used for previous tests
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% APPENDIX %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \section*{Appendix}
-Attached here is the code used for the numerical analysis and plotting entailed in this project.
+%Attached here is the code used for the numerical analysis and plotting entailed in this project.
 %\lstinputlisting{../main.m}
+
+
+
+
 
 
 \end{document}
