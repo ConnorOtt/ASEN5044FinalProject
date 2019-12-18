@@ -103,7 +103,7 @@ class EKF(KF):
 
         # Evaluate jacobians and Kalman gain on nominal trajectory
         H_kp1 = self.H_func(x_pre_kp1, t_kp1, id_list=id_list)
-        R_list = [self.R_kp1 for _ in range(int(H_kp1.shape[0]/3))]
+        R_list = [self.R_kp1 for _ in range(len(id_list))]
         R_kp1 = block_diag(*R_list)
         K_kp1 = self.kalman_gain(P_pre_kp1, H_kp1, R_kp1)
 

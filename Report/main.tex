@@ -85,10 +85,7 @@ As the perturbed orbit drifts further and further from the nominal orbit, the li
 The LKF revolves around the concept of linearizing dynamics and measurement functions around a nominal trajectory at discrete time steps in the filter. 
 This has its benefits in terms of simplicity and computational load, but suffers in terms of accuracy with relatively large deviations from the nominal trajectory. 
 Figures \ref{fig:noisey_states} and \ref{fig:noisey_meas} show a typical noisey truth trajectory and accompanying noisey measurements as compared to the nominal, noiseless trajectory and measurements.  
-Figure \ref{fig:lkf_est_zoom} shows the LKF estimate error and uncertainty bounds for the first 100 time steps (1e4 seconds) of the simulation. 
-The filter performs adequately for these first 100 time steps.
-However, as time goes on, and the truth trajectory deviates further from the nominal, the LKF is unable to estimate an accurate trajectory. 
-Figure \ref{fig:lkf_est} shows the rapidly deriorating estimate error in the LKF.  
+
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=\textwidth]{Figures/noisey_truth.png}
@@ -102,6 +99,11 @@ Figure \ref{fig:lkf_est} shows the rapidly deriorating estimate error in the LKF
 	\caption{Typical noisey measurements as compared to the nominal, noiseless measurements.}
 	\label{fig:noisey_meas}
 \end{figure}
+
+Figure \ref{fig:lkf_est_zoom} shows the LKF estimate error and uncertainty bounds for the first 100 time steps (1e4 seconds) of the simulation. 
+The filter performs adequately for these first 100 time steps.
+However, as time goes on, and the truth trajectory deviates further from the nominal, the LKF is unable to estimate an accurate trajectory. 
+Figure \ref{fig:lkf_est} shows the rapidly deriorating estimate error in the LKF.  
 
 \begin{figure}[H]
 	\centering
@@ -124,10 +126,11 @@ In the following figures, we plot NEES and NIS values from the filter at time k,
 At each time step, the NEES and NIS values are expected to fall into 4 (NEES) or 3 (NIS) degree of freedom $\mathcal{X}^2$ distributions. 
 As such, we expect values to fall within some range of the expecation of these distributions. 
 For this study, we've chosen 95\% confidence bounds, which are denoted with the dotted black lines. 
+\hl{The filter was tuned by adjusting the filter's knowledge of process noise in the system until the simulations reliable generated NEES and NIS results in }
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{./Figures/NEESNIS_lkf_N10.png}
+	\includegraphics[width=0.8\textwidth]{Figures/{NEESNIS_lkf_N10Q1.0E-09}.png}
 	\caption{NEES and NIS chi-square results over time for N= \hl{N} simulated trajectories. Data points continue to grow past ~600 seconds into the analysis.}
 	\label{fig:neesnis_lkf}
 \end{figure}
@@ -147,7 +150,7 @@ The EKF, in contrast with the LKF, is much more capable of tracking the perturbe
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.8\textwidth]{Figures/ekf_estimate_th.png}
-	\caption{EKF error estimate over the entire simulation period. }
+	\caption{Typical EKF error estimate over the entire simulation period. }
 	\label{fig:ekf_est}
 \end{figure}
 
@@ -158,7 +161,7 @@ These results were generated using the same noisey trajectories and measurements
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{./Figures/NEESNIS_ekf_N10.png}
+	\includegraphics[width=0.8\textwidth]{./Figures/{NEESNIS_ekf_N10Q1.0E-09}.png}
 	\caption{NEES and NIS chi-square results over time for N= \hl{N} simulated trajectories.}
 	\label{fig:neesnis_ekf}
 \end{figure}
@@ -169,13 +172,27 @@ This results in the filter's ability to keep up with the deviations from the ori
 
 
 \section{Testing Without Ground Truth}
+In addition to observing each filter's capabilities as compared to truth states and measurements, we estimated a trajectory from which only measurements were available. 
+The results of these  are shown below for the LKF and EKF respectively using the tuned noise and covariance parameters. 
 
 
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{Figures/lkf_dataste_est.png}
+	\caption{LKF results using assigment dataset.}
+	\label{fig:lkf_dataset}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{Figures/ekf_dataset_est.png}
+	\caption{EKF results using assigment dataset.}
+	\label{fig:ekf_dataset}
+\end{figure}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% CONCLUSION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
-
 
 \section{Advanced Questions}
 \subsection{Bugs}
@@ -185,6 +202,34 @@ underneath our keyboard's keys \\
 just end us now. Please, bugs, please. \\
  
 \subsection{The Unscented Kalman Filter}
+The Unscented Kalman Filter is a variant on the Kalman filter which makes still fewer linear approximations than the EKF. 
+The UKF samples 2n+1 sigma points from the current estimate probability distribution function (PDF) and uses these to perfrom time and measurement updates.
+The sigma points are carefully selected to represent the current multivariate PDF. 
+This allows for a more accurate propagation of estimate and covariance through time and measurement updates, as no linearized jacobians are evaluated. 
+The results of an implementation the UKf on the data set used for previous tests are shown below.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{Figures/ukf_dataset_est.png}
+	\caption{UKF results using assigment dataset.}
+	\label{fig:ukf_dataset}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{Figures/ukf_estimate_th.png}
+	\caption{Typical UKF error estimate over the entire simulation period.}
+	\label{fig:ukf_est}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{./Figures/{NEESNIS_ukf_N10Q1.0E-09}.png}
+	\caption{NEES and NIS chi-square results over time for N= \hl{N} simulated trajectories.}
+	\label{fig:neesnis_ukf}
+\end{figure}
+
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% APPENDIX %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

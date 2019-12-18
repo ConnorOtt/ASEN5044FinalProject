@@ -39,6 +39,10 @@ class KF(ABC):
         self.P_0 = system["P_0"]
 
         # State estimate history
+        self.t_k = self.t_0
+        self.x = self.x_0
+        self.P = self.P_0
+
         self.t_hist = [self.t_0]
         self.x_hist = [self.x_0]
         self.P_hist = [self.P_0]
@@ -72,24 +76,25 @@ class KF(ABC):
         """
     
         # t = t_k
-        x_post_k = self.x_hist[-1]
-        P_post_k = self.P_hist[-1]
+        x_post_k = self.x
+        P_post_k = self.P
 
         # Propagate state estimate and covariance
         # NOTE: added t_kp1 because EKF needs it at time update
         x_pre_kp1, P_pre_kp1 = self.time_update(x_post_k, P_post_k, t_kp1)
-
-        # t = t_{k+1}
+        self.t_k = t_kp1
 
         # Update filter's state estimate
         out_dict = self.meas_update(x_pre_kp1, P_pre_kp1, y_kp1, t_kp1)
 
+        self.x = out_dict['x_post_kp1']
+        self.P = out_dict['P_post_kp1'] 
 
         # Write everything out
         self.t_hist.append(t_kp1)
         self.y_hist.append(y_kp1)
-        self.x_hist.append(out_dict['x_post_kp1'])
-        self.P_hist.append(out_dict['P_post_kp1'])
+        self.x_hist.append(self.x)
+        self.P_hist.append(self.P)
         self.dict_th.append(out_dict)
 
 
@@ -118,9 +123,7 @@ class KF(ABC):
             state = [x[i] for x in self.x_hist[start:end]]
             two_sig = [2*sqrt(dp[i]) for dp in diagP]
             ax[i]. plot(self.t_hist[start:end], state, '-', color='dodgerblue')
-            #ax[i].plot(self.t_hist[start:end], 
-            #        state + [(ts, -ts) for ts in two_sig], '--', color='black')
-            # ax[i].plot(self.t_hist[start:end], 
-                    # [(s - ts, s + ts) for (s, ts) in zip(state, two_sig)] , '--', color='black')
+            ax[i].plot(self.t_hist[start:end], 
+                    [(s - ts, s + ts) for (s, ts) in zip(state, two_sig)] , '--', color='black')
 
         plt.show()
