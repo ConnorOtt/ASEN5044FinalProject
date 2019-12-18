@@ -52,7 +52,7 @@ truth_measurements = pickle.load(pickle_in)
 #--------// run EKF with given dataset //---------------------
 
 # Initialize system
-Q = np.eye(2)*10e-10
+Q = np.eye(2)*1e-12
 system = {
     # Required by KF algo
     't_0':t_0,
