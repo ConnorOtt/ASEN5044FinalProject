@@ -110,10 +110,18 @@ Where:
 \end{align*}
 
 \subsection{DT Linearized Model Matrices}
+Below are the equations for the DT jacobians.
+\begin{equation}
+	\begin{aligned}
+		\tilde{F} &= I + \Delta t \cdot \tilde{A} \\
+		\tilde{G} &= \Delta t \cdot \tilde{B} \\
+		\tilde{\Omega} &= \Delta t \cdot \tilde{\Gamma}
+	\end{aligned}
+\end{equation}
 
 
 \subsection{Simulated Nonlinear vs. Linearized System}
-Figure \ref{fig:nlvl_s} shows the difference between propagating a small initial perturbation using full nonlinear dynamics and the above DT state transition matrices. 
+Figure \ref{fig:nlvl_s} shows the difference between propagating a small initial perturbation using full nonlinear dynamics and DT state transition matrices. 
 These were gathered by propagating two orbits, a nominal and initially perturbed orbit, with full nonlinear dynamics using an RK45 integration method.
 The difference between these orbits is shown by the blue line in Figure \ref{fig:nlvl_s}. 
 The initial perturbation (difference between the initial states of the nonlinear trajectories described above) was then propagated using the linearized DT jacobians evaluated on the nominal trajectory. 
@@ -142,12 +150,12 @@ As the perturbed orbit drifts further and further from the nominal orbit, the li
 
 \section{Nonlinear Filtering}
 This section delves into the capabilities of the LKF and EKF in with respect to estimating nonlinear trajectories. 
-We explore this through simulated orbits wherein truth states are generated with a deviation from the nominal initial conditions, and process noise (AWGN) included in the dynamics of the system. 
-The AWGN is added to the accelerations via a Zero Order Hold over each discrete time step in the integrator as the trajectory is calculated. 
-The noisy, perturbed truth states are mapped to measurement space through the nonlinear measurement equation and measurement noise is added on to it.
+We explore this through simulated orbits wherein truth states are generated with a deviation from the nominal initial conditions, and process noise (AWGN) added the dynamics of the system. 
+The process noise is added to the spacecraft accelerations via a Zero Order Hold over each discrete time step in the integrator. 
+The noisy, perturbed truth states are mapped to measurement space through the nonlinear measurement equation and measurement combined with white Gaussian.
 Process and measurement noise are both sampled from $Q_{true}$ and $R_{true}$ given in the assignment data when generating truth trajectories.
 
-Each truth trajectory is initial perturbed with the same $\delta x_0$ sampled from a chosen $P_0$. These are $P_0$ = diag([$10m^2, 1m^2/s^2, 10m^2, 1m^2/s^2$]) and $\delta x_0$ = [0.078 km, 0.022 km/s, -0.058 km, 0.031 km/s].
+Each truth trajectory is initially perturbed with the same $\delta x_0$ sampled from a chosen $P_0$. These are $P_0$ = diag([$10m^2, 1m^2/s^2, 10m^2, 1m^2/s^2$]) and $\delta x_0$ = [0.078 km, 0.022 km/s, -0.058 km, 0.031 km/s].
 All filters begin with this initial estimate either as a deviation of full state, and all begin with this initial covariance. 
 
 
@@ -209,7 +217,7 @@ The equations for a given NEES and NIS equations at a time $k$ is given by Equat
 \begin{equation}
 	\epsilon_{y,k} = e^T_{y,k} (S_k)^{-1} e_{y,k},
 	\quad \text{where} \quad
-	e_{y,k} = y_k - \hat{y}^+_k
+	e_{y,k} = y_k - \hat{y}^-_k
 	\label{eq:NIS}
 \end{equation}
 At each time step, the NEES and NIS values are expected to fall into 4 (NEES) or 3 (NIS) degree of freedom $\mathcal{X}^2$ distributions. 
@@ -217,7 +225,7 @@ As such, we expect values to fall within some range of the expectation of these 
 For this study, we've chosen 95\% confidence bounds, which are denoted with the dotted black lines. 
 The filter was tuned by adjusting the filter's knowledge of process noise in the system until the simulations reliably generated NEES and NIS results within the confidence bounds at least 95\% of the time. 
 Note that in the NEES/NIS test below, only a time span of $k\ \epsilon\ [0, 150]$ is shown due to the LKF's poor performance further into the orbit. 
-Additionally, note that $N$ was chosen to be 10 for the purpose of minimizing computational time, while still conveying the information gathered from these tests. 
+Additionally, note that $N$ was chosen to be 10 for the purpose of minimizing computational time, while still conveying the information gathered from these tests. In deciding N, it was found that increasing N past 10 did no provide substantial insight to filter performance for the increase in computational time. 
 
 In this first iteration of the tuning process, the Kalman filter was initialized with an internal (guessed) process noise of $Q_{KF} = 10^{-6} \cdot I_{2 x 2}$. 
 The results of this test can be seen in Figure \ref{fig:neesnis_lkf_Qbig}. 
@@ -243,7 +251,7 @@ This low bias lead to the conclusion that the guessed $Q_{KF}$ is too small, and
 
 In this third and final iteration of the tuning process, the Kalman filter was initialized with an internal process noise of $Q_{KF} = 10^{-9} \cdot I_{2 x 2}$. 
 The results of this test can be seen in Figure \ref{fig:neesnis_lkf}.
-While neither is perfect (due to the inherent ineptness of the LKF to this orbit determination problem), the $Q_{KF}$ used here seems to be the best choice. 
+While neither is perfect (due to the inherent ineptitude of the LKF to this orbit determination problem), the $Q_{KF}$ used here seems to be the best choice. 
 
 \begin{figure}[H]
 	\centering
@@ -277,6 +285,7 @@ It then linearizes about its current estimate, rather than the initial nominal t
 This allows the EKF to adjust for small perturbations from the nominal that may grow into large deviations with time, as it does not use the nominal trajectory for linearization. 
 
 \subsubsection{EKF Typical Performance}
+Figures \ref{fig:noisey_states} and \ref{fig:noisey_meas} show a typical noisy truth trajectory and accompanying noisey measurements as compared to the nominal, noiseless trajectory and measurements. 
 Figure \ref{fig:ekf_est} shows a time history of a typical EKF estimate. 
 The EKF, in contrast with the LKF, is much more capable of tracking the perturbed trajectory.  
 
@@ -396,6 +405,7 @@ The UKF has additional tuning parameters pertaining to the approximate pdf creat
 It was found that, for this particular problem, changing the distance from the mean at which sigma points are sampled changes very little about the final estimate. 
 This may indicate that, for the perturbations used, and the type of system used, the covariance remains mostly Gaussian even with the nonlinear transformations between time steps and in to measurement space.   
 
+
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=\textwidth]{Figures/ukf_estimate_th.png}
@@ -409,7 +419,6 @@ This may indicate that, for the perturbations used, and the type of system used,
 	\caption{NEES and NIS chi-square results over time for N = 10 simulated trajectories.}
 	\label{fig:neesnis_ukf}
 \end{figure}
-
 
 
 \newpage
