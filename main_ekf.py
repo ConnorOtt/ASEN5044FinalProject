@@ -52,12 +52,13 @@ truth_measurements = pickle.load(pickle_in)
 #--------// run EKF with given dataset //---------------------
 
 # Initialize system
+Q = np.eye(2)*10e-10
 system = {
     # Required by KF algo
-    "t_0": t_0, 
+    't_0':t_0,
     "x_0": x_nom_0 + dx_est_0,
     "P_0": P_0,
-    "Q": np.eye(2)*1e-6, 
+    "Q": Q, 
     "R": Rtrue, 
     **dt_jac_eval_funcs, 
     **ct_nl_funcs,
@@ -92,9 +93,6 @@ ax[0].legend(loc='upper left')
 ax[-1].set_xlabel('time step')
 fig.savefig(fig_dir + 'ekf_dataset_est.png')
 
-plt.show()
-
-# exit(0)
 
 # ------------- //  Perform NEES/NIS tests on EKF // ------------------------
 
@@ -107,22 +105,6 @@ bounds_NEES = chi2.ppf(conf, df_NEES) / num_traj
 df_NIS = num_traj * p # this is not p! because measurement size changes from 
 bounds_NIS = chi2.ppf(conf, df_NIS) / num_traj
 
-
-
-# Initialize system
-system = {
-    # Required by KF algo
-    "t_0": t_0, 
-    "x_0": x_nom_0 + dx_est_0,
-    "P_0": P_0,
-    "Q": np.eye(2)*10e-10, 
-    "R": Rtrue, 
-    **dt_jac_eval_funcs, 
-    **ct_nl_funcs,
-
-    # EKF specific
-    "dt": 10,
-}
 
 # Instantiate filter for system
 report_fields = ['x_post_kp1', 'P_post_kp1', 'y_kp1', 
@@ -168,7 +150,7 @@ NEES_avg = np.mean(np.array(all_NEES), 0)
 NIS_avg = np.mean(np.array(all_NIS), 0)
 
 fig, ax = plt.subplots(2, 1, sharex=True)
-ax[0].set_title('NEES and NIS tests for EKF')
+ax[0].set_title('NEES and NIS tests for EKF, N = {}'.format(num_traj))
 ax[0].plot(NEES_avg, '.', color='orangered', label='NEES Results')
 ax[0].axhline(bounds_NEES[0], linestyle='--', color='black')
 ax[0].axhline(bounds_NEES[1], linestyle='--', color='black')
@@ -183,7 +165,7 @@ ax[1].set_xlabel('time step k')
 ax[1].set_ylim([0, 10])
 ax[1].autoscale(enable=True, axis='x', tight=True)
 ax[1].legend()
-fig.savefig(fig_dir + 'NEESNIS_ekf_N' + str(num_traj) + '.png')
+fig.savefig(fig_dir + 'NEESNIS_ekf_N' + str(num_traj) + 'Q{:.1E}.png'.format(Q[0, 0]))
 
 
 fig, ax = plt.subplots(n, 1, sharex=True)
