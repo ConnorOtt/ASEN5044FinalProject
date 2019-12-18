@@ -94,7 +94,7 @@ plt.rcParams['font.size'] = 24
 plt.rcParams['figure.figsize'] = 16, 12
 fig, ax = plt.subplots(n, 1, sharex=True)
 
-ax[0].set_title('Comparison between nonlinear and linear perturbaton propagation')
+ax[0].set_title('Comparison between nonlinear and linear perturbation propagation')
 
 for i in range(n):
     state_quant1 = [x[i] for x in dx_nl]
@@ -110,7 +110,7 @@ ax[-1].set_xlabel('time step')
 fig.savefig(fig_dir + 'nonlvl_state.png')
 
 fig, ax = plt.subplots(p, 1, sharex=True)
-ax[0].set_title('Comparison between nonlinear and linear perturbaton propagation')
+ax[0].set_title('Comparison between nonlinear and linear perturbation propagation')
 for i in range(p):
     quant1 = [y[i] for y in dy_nl]
     quant2 = [y[i] for y in dy]
