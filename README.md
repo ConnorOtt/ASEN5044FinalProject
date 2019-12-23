@@ -23,14 +23,14 @@ is shown below:
 	    "x_0": dx_est_0,			# Initial state estimate
 	    "P_0": P_0,				# Initial estimate error covariance
 	    "Q": Q, 				# Process noise covariance
-	    "R": R,		 			# Measurement noise covariance
-	    **dt_jac_eval_funcs,	# Discrete-Time linearized system functions 
+	    "R": R,		 		# Measurement noise covariance
+	    **dt_jac_eval_funcs,		# Discrete-Time linearized system functions 
 	    **ct_nl_funcs,			# Continuous-Time nonlinear system functions
 	    # LKF specific
-	    "x_nom_0":x_nom_0,		# Initial nominal trajectory (updated internally)
+	    "x_nom_0":x_nom_0,			# Initial nominal trajectory (updated internally)
 	    "dt": 10,				# Time between discrete time steps in system 
 	}
-	
+
 	lkf = LKF(system)
 	while len(measurements) > 0:  # Loop through measurements 
 	    y = measurements.pop(0)
