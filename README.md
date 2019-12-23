@@ -17,28 +17,26 @@ These classe are instantiated with a dictionary containing various system defint
 linearized mapping functions, initial state, and any extraneous parameters needed for specific filters. An example
 is shown below: 
 
-``` 
-system = {
-    # Required by KF algorithm
-    "t_0": t_0, 			# Initial time
-    "x_0": dx_est_0,		# Initial state estimate
-    "P_0": P_0,				# Initial estimate error covariance
-    "Q": Q, 				# Process noise covariance
-    "R": R,		 			# Measurement noise covariance
-    **dt_jac_eval_funcs,	# Discrete-Time linearized system functions 
-    **ct_nl_funcs,			# Continuous-Time nonlinear system functions
+	system = {
+	    # Required by KF algorithm
+	    "t_0": t_0, 			# Initial time
+	    "x_0": dx_est_0,		# Initial state estimate
+	    "P_0": P_0,				# Initial estimate error covariance
+	    "Q": Q, 				# Process noise covariance
+	    "R": R,		 			# Measurement noise covariance
+	    **dt_jac_eval_funcs,	# Discrete-Time linearized system functions 
+	    **ct_nl_funcs,			# Continuous-Time nonlinear system functions
 
-    # LKF specific
-    "x_nom_0":x_nom_0,		# Initial nominal trajectory (updated internally)
-    "dt": 10,				# Time between discrete time steps in system 
-}
+	    # LKF specific
+	    "x_nom_0":x_nom_0,		# Initial nominal trajectory (updated internally)
+	    "dt": 10,				# Time between discrete time steps in system 
+	}
 
-lkf = LKF(system)
-while len(measurements) > 0:  # Loop through measurements 
-    y = measurements.pop(0)
-    t = time_list.pop(0)
-    lkf.update(t, y)  # Perform time and measurement update. 
-```
+	lkf = LKF(system)
+	while len(measurements) > 0:  # Loop through measurements 
+	    y = measurements.pop(0)
+	    t = time_list.pop(0)
+	    lkf.update(t, y)  # Perform time and measurement update. 
  
 ## System Definition
 The nonlinear and linearized dynamic and measurement functions are defined in ```system_def.py```, and imported to the main functions
