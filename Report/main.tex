@@ -365,7 +365,7 @@ Becuase a large process noise increases the error covariance with each time upda
 If the filter believes underestimates the process noise, the filter becomes smug, and rejects ncoming information from the measurements. 
 
 We also note that the LKF is ill-equipped to handle orbit problems, or any problem where small initial deviations only increase with time.
-In contrast, because the EKF can update the trajectory about wich it linearizes with full nonlinear equations, it's able to keep up with the eventual large deviations seen in orbit problems.  
+In contrast, because the EKF can update the trajectory about which it linearizes with full nonlinear equations, it's able to keep up with the eventual large deviations seen in orbit problems.  
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% APPENDIX %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
@@ -382,7 +382,7 @@ The Unscented Kalman Filter is a variant on the Kalman filter which makes still 
 The UKF samples 2n+1 sigma points from the current estimate probability distribution function (PDF) and uses these to perfrom time and measurement updates.
 The sigma points are carefully selected to represent the current multivariate PDF. 
 This allows for a more accurate propagation of estimate and covariance through time and measurement updates, as no linearized jacobians are evaluated. 
-The results of an implementation the UKf on the data set used for previous tests are shown below.
+The results of an implementation the UKF on the data set used for previous tests are shown below.
 
 \begin{figure}[H]
 	\centering
