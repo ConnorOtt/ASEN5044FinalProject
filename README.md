@@ -42,7 +42,7 @@ while len(measurements) > 0:  # Loop through measurements
  
 ## System Definition
 The nonlinear and linearized dynamic and measurement functions are defined in ```system_def.py```, and imported to the main functions
-to instantiate the filters. More detailed information acn be found in ```system_def.py```.
+to instantiate the filters. More detailed information can be found in ```system_def.py```.
 
 ## Tuning and testing
 The majority of validating, tuning, and testing the filters is done in ```main_(filtername).py```. In these files we perform NEES and NIS tests and plot filter estimates and 2-sigma covariance bounds to better understand filter performance. These scripts rely on data generated in 
