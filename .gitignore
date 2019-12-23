@@ -8,3 +8,5 @@
 *.log
 Report/main.pdf
 *.synctex.gz
+*.html
+

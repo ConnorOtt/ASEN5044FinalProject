@@ -1,5 +1,5 @@
 """
-Define unscented Kalman filter
+Define Unscented Kalman filter (Extra Credit)
 
 Conventions:
     _k, _kp1, _km1      -Indicates time steps k, k (p)lus 1 and k (m)inus 1. This file does not
@@ -22,7 +22,7 @@ from constants import I, n, p, pi, matprint
 from system_def import nl_orbit_prop as nl_prop
 
 
-class UKF(KF):
+class UKF(KF): 
 
     def __init__(self, system):
 
@@ -39,11 +39,10 @@ class UKF(KF):
         self.Q_k = system["Q"]
         self.R_kp1 = system["R"]
 
+        # Sigma point parameters
         self.a = system['a']
         self.b = system['b']
         self.k = system['k']
-
-
         self.lam = self.a**2 * (self.n + self.k) - self.n
 
 
@@ -52,7 +51,6 @@ class UKF(KF):
         Override the general KF's time update
         The UKF uses a nonlinear propagation step for 2n+1
         sigma points, which are sampled from the current covariance. 
-        
 
         The mean and covariance of the propagated sigma points
         are the x_pre_kp1 and P_pre_kp1
@@ -64,7 +62,7 @@ class UKF(KF):
         sigmas_post_k = self.__gen_sigma_points(x_post_k, P_post_k)
 
         sigmas_pre_kp1 = []
-        for x_s in sigmas_post_k:
+        for x_s in sigmas_post_k: # Maybe paralelize, this adds up over time. 
             nl_prop.set_initial_value(x_s, self.t_k)
             nl_prop.set_f_params(None, None)
             nl_prop.integrate(t_kp1)
@@ -80,7 +78,7 @@ class UKF(KF):
 
     def meas_update(self, x_pre_kp1, P_pre_kp1, y_kp1, t_kp1):
         """
-        Override the general KF's measurement update.
+        Override the general KF's measurement update. 
         """
 
         id_list = y_kp1['stationID']
@@ -137,9 +135,8 @@ class UKF(KF):
 
 
     def __gen_sigma_points(self, x, P):
-
         """Generate sigma points sampled from current pdf of the 
-        state estimate 
+            state estimate 
         
         """
         lam = self.lam
@@ -156,6 +153,7 @@ class UKF(KF):
 
         return sigma_points
 
+
     def __recombine_sigma(self, sigma_points, meas_sigma=None):
         """Calculate mean and covariance of a set of sigma points
     
@@ -168,6 +166,7 @@ class UKF(KF):
         a = self.a
         b = self.b
 
+        # Generate weights for each point
         weights_m = [lam / (n + lam)]
         weights_c = [lam / (n + lam) + 1 - a**2 + b]
         for _ in sigma_points[1:]: # already got the first one

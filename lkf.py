@@ -40,6 +40,7 @@ class LKF(KF):
         self.Q_k = system["Q"]
         self.R_kp1 = system["R"]
 
+        # Keeping track of nominal trajectory
         self.x_nom_k = self.x_nom_0
         self.x_nom_th = [self.x_nom_0]
 
@@ -85,7 +86,7 @@ class LKF(KF):
                 'y_kp1': none_meas,
                 'y_nom_kp1': none_meas,
                 'y_pre_est_kp1': none_meas,
-                'innov_cov': None,  # that will not work if it's none but Omega_k
+                'innov_cov': None, 
             }
 
             return out
@@ -115,7 +116,7 @@ class LKF(KF):
             'x_post_kp1': dx_post_kp1,
             'P_post_kp1': P_post_kp1,
 
-            # Whatever the fuck else you want to output
+            # Whatever the _ else you want to output
             'x_full_kp1': x_nom_kp1 + dx_post_kp1,
             'x_nom_kp1': x_nom_kp1,
             'y_kp1':y_kp1,
@@ -133,7 +134,7 @@ class LKF(KF):
         """ 
 
         nom_prop.set_initial_value(self.x_nom_k, 0)
-        nom_prop.set_f_params(None, None)  # Not sure if this works yet
+        nom_prop.set_f_params(None, None)  # This works!
         x_nom_kp1 = nom_prop.integrate(self.delta_t)
 
         self.x_nom_k = x_nom_kp1
@@ -143,6 +144,7 @@ class LKF(KF):
 
 
     def __wrap_angle(self, diff):
+        # Keep the angle differences around 0 (not 2pi)
 
         if diff[2] > pi:
             diff[2] -= 2*pi

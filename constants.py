@@ -8,15 +8,15 @@ from numpy import pi
 from scipy.stats import multivariate_normal as mvn
 
 n = 4 # number of states 
-m = 2
-p = 3
+m = 2 # "" control states
+p = 3 # "" measurement states
 rE = 6378 # km - Earth radius
 r0 = rE + 300 # km - orbit radius
 delta_t = 10 # s
 mu = 398600 # km**3/s**2
 omegaE = 2*pi / 86400
 I = np.eye(n)
-T = 2*pi * np.sqrt(r0**3 / mu)
+T = 2*pi * np.sqrt(r0**3 / mu)  # one orbit period
 
 
 # Intiial state
@@ -31,12 +31,13 @@ P_0_dist = mvn(mean=None, cov=P_0)
 dx_0 = P_0_dist.rvs(random_state=13131)
 dx_est_0 = dx_0 
 
-print(dx_0)
 
 # Not constants but useful/helpful
 data_dir = './Data/'
 fig_dir = './Report/Figures/'
 
+
+# Best ndarray printing function out there. Thank you, braingineer. 
 def matprint(mat, fmt="g"): 
     col_maxes = [max([len(("{:"+fmt+"}").format(x)) for x in col]) for col in mat.T]
     for x in mat:

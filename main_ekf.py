@@ -3,12 +3,11 @@ ASEN 5044 Statistical Estimation - Final Project: OD
 
 This main script performs the following:
     - Initializes the system and and its initial conditions
-    - Implements and tunes a linearized Kalman filter
     - Implements and tunes an extended Kalman filter
 
 Authors:        Keith Covington, Connor Ott
 Created:        09 Dec 2019
-Last Modified:  11 Dec 2019
+Last Modified:  23 Dec 2019
 
 """
 
