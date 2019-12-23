@@ -45,11 +45,42 @@ The nonlinear and linearized dynamic and measurement functions are defined in ``
 to instantiate the filters. More detailed information acn be found in ```system_def.py```.
 
 ## Tuning and testing
-The majority of validating, tuning, and testing the filters is done in ```main_(filtername).py```. In these files we perform NEES and NIS tests and plot filter estimates and 2-sigma covariance bounds to better understand filter performance. 
+The majority of validating, tuning, and testing the filters is done in ```main_(filtername).py```. In these files we perform NEES and NIS tests and plot filter estimates and 2-sigma covariance bounds to better understand filter performance. These scripts rely on data generated in 
+```truth_gen_save.py```, as well as some variables from ```constants.py``` and functions from ```system_def.py```.
 
 ## The Report
-### Introduction: 
+#### Introduction: 
+>**In order to keep track of Earth-orbiting objects, a typical observation scheme includes ground stations which measure range and range-rate to a passing satellite. 
+These measurements, when combined with the known locations of the stations, allows for precises estimates of a satellites orbit state. 
+In addition to an orbit estimate, it's usually useful to quantify the uncertainty in the estimate. 
+This quantity is a based on the uncertainty in the motion of the satellite in orbit, and the uncertainty in the incoming measurements. 
+Neither of these uncertainties are necessarily known.
+In order to accurately predict an estimate uncertainty, both of these uncertainties must be balanced with each other. 
+This is frequently carried out with predictor-corrector estimation algorithm such as the Linearized Kalman Filter (LKF) or Extended Kalman Filter (EKF.)**
+>
+>**In this report, we explore the performance of the LKF and EKF on nonlinear systems with dynamic uncertainty (process noise) and measurement uncertainty (measurement nose.) 
+In developing these algorithms, we assume the process and measurement noise are unknown.
+We then iterate on different process noise and measurement noise covariance matrices and evaluate the algorithms using Normalized Estimation Error Squared (NEES) and Normalized Innovation Squared (NIS) tests until suitable values for uncertainty are found.**
 
-Our full report .tex can be found in ./Report/ and compiled locally with pdflatex. 
+
+Our full, final report be found in ./Report/ as CovingtonOtt_FinalProject.pdf.  
+
+
+## Dependencies
+This codebase requires no packages outside Python's standard library. 
+
+
+## Authors
+Feel free to contact either of the authors at the contact information below with quesitions
+or comments about this repo. 
+If you would like to point out an error in this code, we ask that you do so gently. We are but 
+delicate engineering students, after all.  
+
+Blaine Covington - Master's Student at the University of Colorado - Boulder 	
+(kbcovingtonjr@gmail.com)
+
+Connor Ott - Master's Student at the University of Colorado - Boulder
+(connor.ott@colorado.edu)
+
 
 
